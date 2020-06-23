@@ -1,0 +1,25 @@
+plugins {
+//    id 'java-library'
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '2.2.1.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+}
+
+bootJar{
+    mainClassName = 'networking.server.Server'
+    destinationDirectory = file("./")
+    archiveBaseName = 'server'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation("org.springframework.boot:spring-boot-starter-web")
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

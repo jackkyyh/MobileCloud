@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
 //    init {
 //        logger.value = ""
 //    }
+private var logString: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,8 +79,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun logAppend(str: String){
+    fun logAppend(str: String) {
         val curTime = SimpleDateFormat("[HH:mm:ss:SSS] ", Locale.getDefault()).format(Date())
-        logText.text = curTime + str + "\n" + logText.text.toString()
+        logString = curTime + str + "\n" + logString
+        logText.text = logString
     }
 }
