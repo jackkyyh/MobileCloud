@@ -1,3 +1,4 @@
+include ':utils'
 include ':server'
 include ':app'
 rootProject.name = "Mobile Cloud"

@@ -3,10 +3,10 @@ plugins {
     id 'application'
 }
 
-mainClassName = 'com.urop.server.WebSocketServer'
+mainClassName = 'com.urop.server.Server'
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+//sourceCompatibility = "1.8"
+//targetCompatibility = "1.8"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

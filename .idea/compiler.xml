@@ -3,6 +3,8 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
       <module name="server" target="1.7" />
+      <module name="util" target="1.7" />
+      <module name="utils" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

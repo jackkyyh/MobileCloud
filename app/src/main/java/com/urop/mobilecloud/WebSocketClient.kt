@@ -20,14 +20,18 @@ class WebSocketClient(val mainActivity: MainActivity) {
             .build()
         mWebSocket =
             client.newWebSocket(request, SocketListener(this))
+
+        logAppend("Connection starts")
     }
 
     fun sendMessage(message: String) {
         mWebSocket!!.send(message)
+//        logAppend("Sent: $message")
     }
 
     fun close(code: Int, reason: String?) {
         mWebSocket!!.close(code, reason)
+        logAppend("Connection closed")
     }
 
     fun logAppend(str: String) {
@@ -78,4 +82,7 @@ class WebSocketClient(val mainActivity: MainActivity) {
 
     }
 
+    fun sendMessage(t: Task) {
+        sendMessage(t.task2json())
+    }
 }
