@@ -2,13 +2,14 @@ package com.urop.server;
 
 public class Task {
     //    public String id;
-    public String header;
-    public String body;
-    public String meta;
+    public String cmd;
+    public String data;
+    public String meta; // id
+    public int waitCount = 2;
 
-    public Task(String header, String body, String meta) {
-        this.header = header;
-        this.body = body;
+    public Task(String cmd, String data, String meta) {
+        this.cmd = cmd;
+        this.data = data;
         this.meta = meta;
     }
 

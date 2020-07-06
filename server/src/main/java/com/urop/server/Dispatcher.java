@@ -2,97 +2,128 @@ package com.urop.server;
 
 import org.java_websocket.WebSocket;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
+import static com.urop.server.Utils.logAppend;
 import static com.urop.server.Utils.task2json;
+//import static com.urop.server.Utils.
 
-public class Dispatcher extends Thread {
+public class Dispatcher implements Runnable {
 
-    LinkedList<WebSocket> avaiNodes;
+    LinkedList<WebSocket> availNodes;
     LinkedList<WebSocket> busyNodes;
-    volatile LinkedList<Task> pendingTasks;
-    volatile LinkedList<String> executingTasks;
+    volatile List<Task> pendingTasks;
+    volatile Map<WebSocket, Task> executingTasks;
+    volatile Collection<String> finishedTasks;
+//    Server server;
 
     Dispatcher() {
-        avaiNodes = new LinkedList<>();
+        availNodes = new LinkedList<>();
         busyNodes = new LinkedList<>();
         pendingTasks = new LinkedList<>();
-        executingTasks = new LinkedList<>();
+        executingTasks = new HashMap<>();
+        finishedTasks = new HashSet<>();
+//        server = s;
     }
 
-//    public synchronized void tryDispatch() {
-//        if (!avaiNodes.isEmpty() && !pendingTasks.isEmpty()) {
-//            WebSocket avai = avaiNodes.removeFirst();
-//            Task t = pendingTasks.removeFirst();
-//            avai.send(task2json(t));
-//            busyNodes.addLast(avai);
-//            executingTasks.addLast(t.header);
-//        }
-//    }
-
-    public synchronized void loopDispatch() {
-        while (!avaiNodes.isEmpty() && !pendingTasks.isEmpty()) {
-            WebSocket avai = avaiNodes.removeFirst();
-            Task t = pendingTasks.poll();
-            avai.send(task2json(t));
+    private synchronized void loopDispatch() {
+        while (!availNodes.isEmpty() && !pendingTasks.isEmpty()) {
+            WebSocket avail = availNodes.removeFirst();
+            Task t = pendingTasks.remove(0);
+            avail.send(task2json(t));
 //            logAppend("send: " + task2json(t));
-            busyNodes.add(avai);
-            assert t != null;
-            executingTasks.add(t.header);
-
+            busyNodes.add(avail);
+            executingTasks.put(avail, t);
         }
     }
 
-//    public void run() {
-//        while (true) {
-//            tryDispatch();
-//        }
-//    }
-
-    public synchronized void addAvaiNode(WebSocket node) {
-        avaiNodes.add(node);
+    public void dispatch() {
+        while (true) {
+            loopDispatch();
+        }
     }
 
-    public synchronized void addTask(Task t) {
-        pendingTasks.addLast(t);
-    }
 
-    public synchronized boolean allTasksFinished() {
-//        logAppend("pending: " + pendingTasks.size());
-        int pend = pendingTasks.size();
-        int exe = executingTasks.size();
-//        if(pend != 0 || exe != 0){
-//            logAppend("pend: " + pend + " exe: " + exe);
-//        }
+    public synchronized boolean allTasksFinish() {
         return executingTasks.isEmpty() && pendingTasks.isEmpty();
     }
 
-    public synchronized void printTaskSize() {
-//        logAppend("pending: " + pendingTasks.size());
-//        logAppend("executing: " + executingTasks.size());
+//    public boolean isTaskFinished(String str){
+//        return finishedTasks.contains(str);
+//    }
+
+    public void blockUntilAllTasksFinish() {
+        try {
+            synchronized (this) {
+                if (!allTasksFinish()) {
+                    this.wait();
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized void printTaskCount() {
+        logAppend("Pending: " + pendingTasks.size() +
+                ". Executing: " + executingTasks.size());
     }
 
     public synchronized boolean commitTask(WebSocket conn, Task t) {
 
         if (!busyNodes.remove(conn)) {
-//            logAppend("busyNodes removal failed!");
+            logAppend("busyNodes removal failed!");
             return false;
         }
-        avaiNodes.addLast(conn);
-        if (!executingTasks.remove(t.header)) {
-//            logAppend("executingTasks removal failed!");
+        availNodes.add(conn);
+
+        if (executingTasks.remove(conn) == null) {
+            logAppend("executingTasks removal failed!");
             return false;
+        }
+        finishedTasks.add(t.meta);
+
+        if (allTasksFinish()) {
+            this.notify();
         }
 
-//        if(allTasksFinished()){
-//            Thread.currentThread().notifyAll();
-//        }
-        printTaskSize();
+//        printTaskCount();
         return true;
     }
 
+    public synchronized void addAvailNode(WebSocket node) {
+        availNodes.add(node);
+//        synchronized (this){
+        this.notify();
+//        }
+    }
+
+
+    public synchronized void addPendingTask(Task t) {
+        pendingTasks.add(t);
+    }
+
     public synchronized void removeNode(WebSocket conn) {
-        avaiNodes.remove(conn);
+        availNodes.remove(conn);
         busyNodes.remove(conn);
+        Task t = executingTasks.remove(conn);
+        if (t != null) {
+            pendingTasks.add(t);
+        }
+    }
+
+
+    public boolean hasNode() {
+        return !availNodes.isEmpty() || !busyNodes.isEmpty();
+    }
+
+    @Override
+    public void run() {
+        dispatch();
     }
 }

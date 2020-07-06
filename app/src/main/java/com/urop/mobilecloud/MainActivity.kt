@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     private var logString: String = ""
     private val webSocket = WebSocketClient(this)
-    private val worker = Worker(this)
+    private val worker = Worker()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,15 +47,13 @@ class MainActivity : AppCompatActivity() {
     fun msgParser(msg: String) {
 //        logAppend("receive msg: $msg")
         val task = msg.json2task()
-        if (task.header == "Message") {
-//            logAppend("Msg: ${task.body}")
-//            while(true){}
-//            Thread.sleep(4000)
+        if (task.cmd == "Message") {
+            logAppend("Msg: ${task.data}")
         } else {
             worker.addTask(task)
             var res = Task()
             val duration = measureTimeMillis { res = worker.work() }
-            logAppend("${res.header} ${res.meta} done. Duration: " + duration + "ms")
+            logAppend("${res.cmd} ${res.meta} done: " + duration + "ms")
 //            val res = worker.result
 
 //            val sendMsg = res.task2json()
@@ -65,24 +63,9 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-//    fun parseData(strData: String) {
-//        val listData = Gson().fromJson(strData, IntArray::class.java)
-//        logAppend(listData.size.toString() + " ints received")
-//
-//
-//        val duration = measureTimeMillis { worker.work() }
-//        logAppend("Work done. Duration: " + duration + "ms")
-//
-//        logAppend(worker.result.toString())
-//
-//
-//        webSocket.sendMessage("Data: " + gson.toJson(worker.result))
-//    }
-
-
 }
 
-class Worker(val mainActivity: MainActivity) {
+class Worker {
 //    var data: IntArray
 
     private var taskBuffer: MutableList<Task> = mutableListOf()
@@ -102,13 +85,13 @@ class Worker(val mainActivity: MainActivity) {
 //        val (cmd, data) = task
 //        var resCmd = cmd
 
-        val resData: String = when (task.header) {
-            "QSRT" -> qsort(task.body)
-            "MSRT" -> msort(task.body)
+        val resData: String = when (task.cmd) {
+            "QSRT" -> qsort(task.data)
+            "MSRT" -> msort(task.data)
             else -> "CMD not understood!"
         }
         val tt = task
-        tt.body = resData
+        tt.data = resData
         return tt
     }
 
@@ -140,8 +123,8 @@ class Worker(val mainActivity: MainActivity) {
 }
 
 data class Task(
-    val header: String = "", var body: String = "",
-    val meta: String = ""
+    val cmd: String = "", var data: String = "",
+    val meta: String = "", var waitCount: Int = 0
 )
 
 val gson = Gson()
