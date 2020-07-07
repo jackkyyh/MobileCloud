@@ -17,7 +17,7 @@ import static com.urop.server.Utils.logAppend;
 
 public class SortController implements TaskController {
 
-    final int MIN_SEG_LENGTH = 10000;
+    final int MIN_SEG_LENGTH = 5000;
     final int ARR_LENGTH = 1000000;
     volatile public int[] arr;
     Gson gson;

@@ -21,24 +21,31 @@ class MainActivity : AppCompatActivity() {
 
         logAppend("Welcome to Mobile Cloud!")
         logAppend("Tap Connect to start ... ")
+        val ip =
 
-        netSwitcher.setOnCheckedChangeListener { _, isChecked -> switchChecked(isChecked) }
+            netSwitcher.setOnCheckedChangeListener { _, isChecked -> switchChecked(isChecked) }
+        clearLogBotton.setOnClickListener { clearLog() }
     }
 
 
     private fun switchChecked(isChecked: Boolean) {
         if (isChecked) {
-            webSocket.connect("ws://jackys-windows:9544")
+            webSocket.connect("ws://192.168.1.108:9544")
             webSocket.sendMessage(Task("Message", "Hi, server!"))
         } else {
             webSocket.close(4321, "bye")
         }
     }
 
+    fun clearLog() {
+        logString = ""
+        logText.text = ""
+    }
+
     fun logAppend(str: String) {
-        val curTime = SimpleDateFormat("[HH:mm:ss:SSS] ", Locale.getDefault()).format(Date())
-        logString = curTime + str + "\n" + logString
         runOnUiThread {
+            val curTime = SimpleDateFormat("[HH:mm:ss:SSS] ", Locale.getDefault()).format(Date())
+            logString = curTime + str + "\n" + logString
             logText.text = logString
         }
     }

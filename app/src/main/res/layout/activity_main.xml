@@ -8,15 +8,30 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Switch
-        android:id="@+id/netSwitcher"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:text="Connect"
-        android:textSize="20sp" />
+        android:orientation="horizontal">
+
+        <Switch
+            android:id="@+id/netSwitcher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:text="Connect"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/clearLogBotton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="none"
+            android:text="Clear log"
+            android:textSize="15sp" />
+
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -37,5 +52,6 @@
             android:textSize="15sp"
             tools:text="1test\n2test\n3test\n4test" />
     </ScrollView>
+
 
 </LinearLayout>
