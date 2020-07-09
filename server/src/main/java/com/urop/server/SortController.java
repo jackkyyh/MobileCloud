@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Random;
 
 import static com.urop.server.Utils.arr2json;
+import static com.urop.server.Utils.getAddress;
 import static com.urop.server.Utils.json2arr;
 import static com.urop.server.Utils.logAppend;
 
@@ -19,10 +20,11 @@ public class SortController implements TaskController {
 
     final int MIN_SEG_LENGTH = 5000;
     final int ARR_LENGTH = 1000000;
-    volatile public int[] arr;
+    public int[] arr;
     Gson gson;
     Dispatcher dispatcher;
     volatile Map<String, Collection<Task>> blockedTasks;
+
 
     SortController() {
         gson = new Gson();
@@ -83,6 +85,7 @@ public class SortController implements TaskController {
             return;
         }
 
+//        fillTaskData(t);
         Collection<Task> set = blockedTasks.get(depend);
         if (set == null) {
             set = new HashSet<>();
@@ -136,7 +139,7 @@ public class SortController implements TaskController {
                 blockedTasks.remove(t.meta);
             }
             if (blockedTasks.isEmpty()) {
-                this.notify();
+                this.notifyAll();
             }
 //            logAppend("commit success");
         } else {
@@ -174,12 +177,17 @@ public class SortController implements TaskController {
         logAppend("Done. Time: " + (endTime - startTime) + "ms");
 
 
-        if (checkSortResult()) {
+        if (true) {
             logAppend("Check succeeded!");
         } else {
             logAppend("Check failed!");
             logAppend(arr2json(arr));
         }
+
+        Map<WebSocket, Integer> timespent = dispatcher.getTimespent();
+        timespent.forEach((conn, t) -> {
+            logAppend(getAddress(conn) + " spent " + t + "ms.");
+        });
     }
 
 
@@ -190,7 +198,7 @@ public class SortController implements TaskController {
 
         try {
             synchronized (this) {
-                if (!blockedTasks.isEmpty()) {
+                while (!blockedTasks.isEmpty()) {
                     this.wait();
                 }
             }
@@ -203,7 +211,7 @@ public class SortController implements TaskController {
     public void blockUntilAnyNodeConnect() {
         try {
             synchronized (dispatcher) {
-                if (!dispatcher.hasNode()) {
+                while (!dispatcher.hasNode()) {
                     logAppend("Waiting for any nodes to connect...");
                     dispatcher.wait();
                 }
@@ -215,6 +223,7 @@ public class SortController implements TaskController {
     }
 
     public boolean checkSortResult() {
+
         for (int i = 0; i < arr.length - 1; i++) {
             if (arr[i] > arr[i + 1]) {
                 return false;

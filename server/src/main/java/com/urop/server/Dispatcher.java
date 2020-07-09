@@ -15,11 +15,13 @@ import static com.urop.server.Utils.task2json;
 
 public class Dispatcher implements Runnable {
 
-    LinkedList<WebSocket> availNodes;
-    LinkedList<WebSocket> busyNodes;
+    List<WebSocket> availNodes;
+    List<WebSocket> busyNodes;
     volatile List<Task> pendingTasks;
     volatile Map<WebSocket, Task> executingTasks;
     volatile Collection<String> finishedTasks;
+
+    volatile Map<WebSocket, Integer> timespent;
 //    Server server;
 
     Dispatcher() {
@@ -28,12 +30,13 @@ public class Dispatcher implements Runnable {
         pendingTasks = new LinkedList<>();
         executingTasks = new HashMap<>();
         finishedTasks = new HashSet<>();
+        timespent = new HashMap<>();
 //        server = s;
     }
 
     private synchronized void loopDispatch() {
         while (!availNodes.isEmpty() && !pendingTasks.isEmpty()) {
-            WebSocket avail = availNodes.removeFirst();
+            WebSocket avail = availNodes.remove(0);
             Task t = pendingTasks.remove(0);
             avail.send(task2json(t));
 //            logAppend("send: " + task2json(t));
@@ -44,12 +47,30 @@ public class Dispatcher implements Runnable {
 
     public void dispatch() {
         while (true) {
-            loopDispatch();
+            synchronized (this) {
+                while (!availNodes.isEmpty() && !pendingTasks.isEmpty()) {
+                    WebSocket avail = availNodes.remove(0);
+
+                    Task t = pendingTasks.remove(0);
+                    avail.send(task2json(t));
+//            logAppend("send: " + task2json(t));
+                    busyNodes.add(avail);
+                    executingTasks.put(avail, t);
+//                    logAppend(t.meta + " added to executing");
+                }
+//                logAppend("wait");
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+//                    logAppend("recover");
+                }
+            }
         }
     }
 
 
-    public synchronized boolean allTasksFinish() {
+    public synchronized boolean isAllTasksFinished() {
         return executingTasks.isEmpty() && pendingTasks.isEmpty();
     }
 
@@ -60,7 +81,7 @@ public class Dispatcher implements Runnable {
     public void blockUntilAllTasksFinish() {
         try {
             synchronized (this) {
-                if (!allTasksFinish()) {
+                while (!isAllTasksFinished()) {
                     this.wait();
                 }
             }
@@ -82,14 +103,28 @@ public class Dispatcher implements Runnable {
         }
         availNodes.add(conn);
 
-        if (executingTasks.remove(conn) == null) {
+//        try{
+//            Thread.sleep(10);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        Task rem = executingTasks.remove(conn);
+        if (rem == null) {
             logAppend("executingTasks removal failed!");
+            logAppend("Task: " + t.cmd + t.meta);
             return false;
+        } else {
+            assert rem.meta.equals(t.meta);
+//            logAppend(t.meta + " removed from executing");
         }
         finishedTasks.add(t.meta);
 
-        if (allTasksFinish()) {
-            this.notify();
+        Integer ws = timespent.getOrDefault(conn, 0);
+        ws += t.waitCount;
+        timespent.put(conn, ws);
+
+        this.notifyAll();
+        if (isAllTasksFinished()) {
         }
 
 //        printTaskCount();
@@ -99,13 +134,14 @@ public class Dispatcher implements Runnable {
     public synchronized void addAvailNode(WebSocket node) {
         availNodes.add(node);
 //        synchronized (this){
-        this.notify();
+        this.notifyAll();
 //        }
     }
 
 
     public synchronized void addPendingTask(Task t) {
         pendingTasks.add(t);
+        this.notifyAll();
     }
 
     public synchronized void removeNode(WebSocket conn) {
@@ -120,6 +156,10 @@ public class Dispatcher implements Runnable {
 
     public boolean hasNode() {
         return !availNodes.isEmpty() || !busyNodes.isEmpty();
+    }
+
+    public Map<WebSocket, Integer> getTimespent() {
+        return timespent;
     }
 
     @Override

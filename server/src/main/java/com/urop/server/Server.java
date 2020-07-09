@@ -33,7 +33,8 @@ public class Server {
 //        Thread.sleep(5000);
 //        Runnable sorter = new SortController();
 
-        TaskController sorter = new SortController();
+        TaskController sorter = new NopController();
+//        TaskController sorter = new SortController();
 
         server.run(sorter);
 //        BufferedReader sysin = new BufferedReader( new InputStreamReader( System.in ) );
@@ -67,7 +68,7 @@ public class Server {
 
         Gson gson = new Gson();
         Task greetings = new Task("Message", "Greetings from the server!", "");
-        conn.send(gson.toJson(greetings)); //This method sends a message to the new client
+//        conn.send(gson.toJson(greetings)); //This method sends a message to the new client
 
         dispatcher.addAvailNode(conn);
     }

@@ -2,6 +2,8 @@ package com.urop.server;
 
 import com.google.gson.Gson;
 
+import org.java_websocket.WebSocket;
+
 public class Utils {
 //    private static final GsonTaskConverter SINGLETON = new GsonTaskConverter();
 
@@ -23,6 +25,10 @@ public class Utils {
 
     public static int[] json2arr(String str) {
         return gson.fromJson(str, int[].class);
+    }
+
+    public static String getAddress(WebSocket conn) {
+        return conn.getRemoteSocketAddress().getAddress().getHostAddress();
     }
 
     public static void logAppend(String text) {

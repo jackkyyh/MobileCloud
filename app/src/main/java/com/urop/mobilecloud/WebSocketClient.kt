@@ -39,6 +39,8 @@ class WebSocketClient(val mainActivity: MainActivity) {
     }
 
     fun msgParser(msg: String) {
+//        mWebSocket!!.send(msg)
+//        logAppend("Get a msg")
         mainActivity.msgParser(msg)
     }
 
@@ -47,6 +49,7 @@ class WebSocketClient(val mainActivity: MainActivity) {
         override fun onMessage(webSocket: WebSocket, text: String) {
             super.onMessage(webSocket, text)
             msgParser(text)
+//            webSocket.send(text)
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {

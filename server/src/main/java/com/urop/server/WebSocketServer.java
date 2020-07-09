@@ -17,11 +17,8 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
     }
 
 
-    @Override
-    public void onOpen(WebSocket conn, ClientHandshake handshake) {
-
-        logAppend(getAddress(conn) + ": connection established.");
-        server.newNode(conn);
+    public static String getAddress(WebSocket conn) {
+        return conn.getRemoteSocketAddress().getAddress().getHostAddress();
     }
 
     @Override
@@ -37,10 +34,10 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
 //    }
 
     @Override
-    public void onMessage(WebSocket conn, String message) {
-//        logAppend("msg" + message);
-        server.msgParser(conn, message);
-//        System.out.println(getAddress(conn) + ": " + message);
+    public void onOpen(WebSocket conn, ClientHandshake handshake) {
+
+//        logAppend(getAddress(conn) + ": connection established.");
+        server.newNode(conn);
     }
 
     @Override
@@ -58,8 +55,12 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
         setConnectionLostTimeout(100);
     }
 
-
-    private String getAddress(WebSocket conn) {
-        return conn.getRemoteSocketAddress().getAddress().getHostAddress();
+    @Override
+    public void onMessage(WebSocket conn, String message) {
+//        logAppend("msg" + message);
+//        conn.send(message);
+        server.msgParser(conn, message);
+//        System.out.println(getAddress(conn) + ": " + message);
     }
+
 }

@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
 
         logAppend("Welcome to Mobile Cloud!")
         logAppend("Tap Connect to start ... ")
-        val ip =
+//        val ip =
 
             netSwitcher.setOnCheckedChangeListener { _, isChecked -> switchChecked(isChecked) }
         clearLogBotton.setOnClickListener { clearLog() }
@@ -30,8 +30,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun switchChecked(isChecked: Boolean) {
         if (isChecked) {
-            webSocket.connect("ws://192.168.1.108:9544")
-            webSocket.sendMessage(Task("Message", "Hi, server!"))
+            webSocket.connect("ws://jackys-windows:9544")
+//            webSocket.sendMessage(Task("Message", "Hi, server!"))
         } else {
             webSocket.close(4321, "bye")
         }
@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
             worker.addTask(task)
             var res = Task()
             val duration = measureTimeMillis { res = worker.work() }
+            res.waitCount = duration.toInt()
             logAppend("${res.cmd} ${res.meta} done: " + duration + "ms")
 //            val res = worker.result
 
@@ -95,10 +96,12 @@ class Worker {
         val resData: String = when (task.cmd) {
             "QSRT" -> qsort(task.data)
             "MSRT" -> msort(task.data)
+            "NOP" -> nop(task.data)
             else -> "CMD not understood!"
         }
         val tt = task
         tt.data = resData
+//        Thread.sleep(100)
         return tt
     }
 
@@ -125,6 +128,12 @@ class Worker {
         while (j < size) temp[k++] = a[j++]
 
         return temp.arr2json()
+    }
+
+    private fun nop(data: String): String {
+//        val a = data.json2arr()
+//        a[0] = 1    // avoid compiler optimization
+        return data
     }
 
 }
