@@ -2,7 +2,7 @@ package com.urop.mobilecloud
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
+import com.urop.common.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
 //            val sendMsg = res.task2json()
 //            logAppend("sending msg: $sendMsg")
-            webSocket.sendMessage(res)
+            webSocket.sendMessage(res.task2json())
         }
 
     }
@@ -136,27 +136,4 @@ class Worker {
         return data
     }
 
-}
-
-data class Task(
-    val cmd: String = "", var data: String = "",
-    val meta: String = "", var waitCount: Int = 0
-)
-
-val gson = Gson()
-
-fun String.json2task(): Task {
-    return gson.fromJson(this, Task::class.java)
-}
-
-fun String.json2arr(): IntArray {
-    return gson.fromJson(this, IntArray::class.java)
-}
-
-fun IntArray.arr2json(): String {
-    return gson.toJson(this)
-}
-
-fun Task.task2json(): String {
-    return gson.toJson(this)
 }

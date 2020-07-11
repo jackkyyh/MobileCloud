@@ -1,15 +1,17 @@
 package com.urop.server;
 
-import com.google.gson.Gson;
+
+import com.urop.common.Task;
 
 import org.java_websocket.WebSocket;
 
-import static com.urop.server.Utils.json2task;
+import static com.urop.common.UtilsKt.json2task;
+import static com.urop.common.UtilsKt.task2json;
 import static com.urop.server.Utils.logAppend;
 
 public class Server {
 
-//    Gson gson;
+    //    Gson gson;
     WebSocketServer webSocketServer;
     Dispatcher dispatcher;
     TaskController taskController;
@@ -66,9 +68,9 @@ public class Server {
 
     public void newNode(WebSocket conn) {
 
-        Gson gson = new Gson();
+//        Gson gson = new Gson();
         Task greetings = new Task("Message", "Greetings from the server!", "");
-//        conn.send(gson.toJson(greetings)); //This method sends a message to the new client
+        conn.send(task2json(greetings)); //This method sends a message to the new client
 
         dispatcher.addAvailNode(conn);
     }

@@ -1,5 +1,7 @@
 package com.urop.server;
 
+import com.urop.common.Task;
+
 import org.java_websocket.WebSocket;
 
 public interface TaskController extends Runnable {

@@ -1,6 +1,7 @@
 package com.urop.server;
 
 import com.google.gson.Gson;
+import com.urop.common.Task;
 
 import org.java_websocket.WebSocket;
 
@@ -11,9 +12,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 
-import static com.urop.server.Utils.arr2json;
+import static com.urop.common.UtilsKt.arr2json;
+import static com.urop.common.UtilsKt.json2arr;
 import static com.urop.server.Utils.getAddress;
-import static com.urop.server.Utils.json2arr;
 import static com.urop.server.Utils.logAppend;
 
 public class SortController implements TaskController {

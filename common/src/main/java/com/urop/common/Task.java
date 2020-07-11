@@ -1,7 +1,6 @@
-package com.urop.server;
+package com.urop.common;
 
 public class Task {
-    //    public String id;
     public String cmd;
     public String data;
     public String meta; // id
@@ -13,8 +12,9 @@ public class Task {
         this.meta = meta;
     }
 
-//    public static int globalIDCount;
-//    public static String idDispatcher(){
-//
-//    }
+    public Task() {
+        cmd = "";
+        data = "";
+        meta = "";
+    }
 }

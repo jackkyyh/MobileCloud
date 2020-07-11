@@ -85,7 +85,7 @@ class WebSocketClient(val mainActivity: MainActivity) {
 
     }
 
-    fun sendMessage(t: Task) {
-        sendMessage(t.task2json())
-    }
+//    fun sendMessage(t: Task) {
+//        sendMessage(t.task2json())
+//    }
 }
