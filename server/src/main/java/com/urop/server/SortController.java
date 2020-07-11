@@ -1,6 +1,7 @@
 package com.urop.server;
 
-import com.google.gson.Gson;
+
+import com.urop.common.MyKryo;
 import com.urop.common.Task;
 
 import org.java_websocket.WebSocket;
@@ -22,13 +23,12 @@ public class SortController implements TaskController {
     final int MIN_SEG_LENGTH = 5000;
     final int ARR_LENGTH = 1000000;
     public int[] arr;
-    Gson gson;
     Dispatcher dispatcher;
     volatile Map<String, Collection<Task>> blockedTasks;
+    volatile Map<byte[], Collection<Task>> bblockedTasks;
 
 
     SortController() {
-        gson = new Gson();
         blockedTasks = new HashMap<>();
 
         Random r = new Random();
@@ -43,7 +43,12 @@ public class SortController implements TaskController {
     public void sort(int start, int end) {
         if (end - start <= MIN_SEG_LENGTH) {
             Task t = createTask("QSRT", start, end);
-            addBlockedTask(null, t);
+            if (MyKryo.enable) {
+                addBlockedTask((byte[]) null, t);
+
+            } else {
+                addBlockedTask((String) null, t);
+            }
             return;
         }
 
@@ -51,42 +56,31 @@ public class SortController implements TaskController {
         sort(start, middle);
         sort(middle, end);
 
-//        while (!dispatcher.allTasksFinished()) {
-//            try{
-//                Thread.sleep(1000);
-//            } catch (InterruptedException ex){
-//                logAppend(ex.getMessage());
-//            }
-//            logAppend("testing failed");
-//        }
-//        dispatcher.printTaskCount();
-//        try{
-//            wait();
-//        } catch (InterruptedException ex){
-//            logAppend(ex.getMessage());
-//        }
-//        logAppend("all task finished");
 
-        String dep1 = arr2json(new int[]{start, middle});
-        String dep2 = arr2json(new int[]{middle, end});
 //        while(!dispatcher.isTaskFinished(dep1) || !dispatcher.isTaskFinished(dep2)){}
         Task t = createTask("MSRT", start, end);
 //        String dep1 = createHeader()
-        addBlockedTask(dep1, t);
-        addBlockedTask(dep2, t);
+        if (MyKryo.enable) {
+            byte[] dep1 = MyKryo.INSTANCE.arr2byte(new int[]{start, middle});
+            byte[] dep2 = MyKryo.INSTANCE.arr2byte(new int[]{middle, end});
+            addBlockedTask(dep1, t);
+            addBlockedTask(dep2, t);
+        } else {
+            String dep1 = arr2json(new int[]{start, middle});
+            String dep2 = arr2json(new int[]{middle, end});
+            addBlockedTask(dep1, t);
+            addBlockedTask(dep2, t);
+        }
     }
 
-//    public void addBlockedTask()
 
     public synchronized void addBlockedTask(String depend, Task t) {
-//        Collection set = blockedTasks.getOrDefault(depend, new HashSet<>());
         if (depend == null) {
             fillTaskData(t);
             dispatcher.addPendingTask(t);
             return;
         }
 
-//        fillTaskData(t);
         Collection<Task> set = blockedTasks.get(depend);
         if (set == null) {
             set = new HashSet<>();
@@ -95,14 +89,31 @@ public class SortController implements TaskController {
         } else {
             set.add(t);
         }
-
-//        logAppend();
     }
 
+    public synchronized void addBlockedTask(byte[] depend, Task t) {
+//        Collection set = blockedTasks.getOrDefault(depend, new HashSet<>());
+        if (depend == null) {
+            fillTaskData(t);
+            dispatcher.addPendingTask(t);
+            return;
+        }
+
+//        fillTaskData(t);
+        Collection<Task> set = bblockedTasks.get(depend);
+        if (set == null) {
+            set = new HashSet<>();
+            set.add(t);
+            bblockedTasks.put(depend, set);
+        } else {
+            set.add(t);
+        }
+
+    }
     public Task createTask(String header, int start, int end) {
         int[] meta = {start, end};
         String jsonMeta = arr2json(meta);
-        return new Task(header, null, jsonMeta);
+        return new Task("NOP", null, jsonMeta);
 
 //        int[] subarr = Arrays.copyOfRange(arr, start, end);
 //        String jsonArr = arr2json(subarr);

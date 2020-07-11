@@ -21,36 +21,23 @@ public class Server {
         int port = 9544;
         webSocketServer = new WebSocketServer(port, this);
         webSocketServer.start();
-
         System.out.println("Server started on port: " + webSocketServer.getPort());
 
         dispatcher = new Dispatcher();
 
-//        logAppend(Thread.currentThread().getName() + "working");
     }
 
     public static void main(String[] args) {
-
         Server server = new Server();
-//        Thread.sleep(5000);
-//        Runnable sorter = new SortController();
 
-        TaskController sorter = new NopController();
-//        TaskController sorter = new SortController();
+//        TaskController sorter = new NopController();
+        TaskController sorter = new SortController();
 
         server.run(sorter);
-//        BufferedReader sysin = new BufferedReader( new InputStreamReader( System.in ) );
-//        while ( true ) {
-//            String in = sysin.readLine();
-//            s.broadcast( in );
-//            if( in.equals( "exit" ) ) {
-//                s.stop(1000);
-//                break;
-//            }
-//        }
     }
 
     public void run(TaskController r) {
+
         taskController = r;
         r.setDispatcher(dispatcher);
 

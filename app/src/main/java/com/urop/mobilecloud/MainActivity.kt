@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         logAppend("Tap Connect to start ... ")
 //        val ip =
 
-            netSwitcher.setOnCheckedChangeListener { _, isChecked -> switchChecked(isChecked) }
+        netSwitcher.setOnCheckedChangeListener { _, isChecked -> switchChecked(isChecked) }
         clearLogBotton.setOnClickListener { clearLog() }
     }
 
@@ -133,6 +133,7 @@ class Worker {
     private fun nop(data: String): String {
 //        val a = data.json2arr()
 //        a[0] = 1    // avoid compiler optimization
+//        return a.arr2json()
         return data
     }
 

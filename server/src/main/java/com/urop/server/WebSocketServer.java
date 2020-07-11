@@ -4,6 +4,7 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
 import static com.urop.server.Utils.logAppend;
 
@@ -62,5 +63,11 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
         server.msgParser(conn, message);
 //        System.out.println(getAddress(conn) + ": " + message);
     }
+
+    @Override
+    public void onMessage(WebSocket conn, ByteBuffer message) {
+        super.onMessage(conn, message);
+    }
+
 
 }
