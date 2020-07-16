@@ -2,7 +2,10 @@ package com.urop.mobilecloud
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.urop.common.*
+import com.urop.common.Task
+import com.urop.common.toBAarr
+import com.urop.common.toIArr
+import com.urop.common.toTask
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -15,6 +18,8 @@ class MainActivity : AppCompatActivity() {
     private val webSocket = WebSocketClient(this)
     private val worker = Worker()
 
+    var switchOffManually = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,15 +30,19 @@ class MainActivity : AppCompatActivity() {
 
         netSwitcher.setOnCheckedChangeListener { _, isChecked -> switchChecked(isChecked) }
         clearLogBotton.setOnClickListener { clearLog() }
+
+        netSwitcher.performClick()
     }
 
 
     private fun switchChecked(isChecked: Boolean) {
         if (isChecked) {
             webSocket.connect("ws://jackys-windows:9544")
-//            webSocket.sendMessage(Task("Message", "Hi, server!"))
+            webSocket.sendMessage(Task.Greeting("Hi, this is ${android.os.Build.MODEL}"))
+            switchOffManually = false
         } else {
             webSocket.close(4321, "bye")
+            switchOffManually = true
         }
     }
 
@@ -50,25 +59,45 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun retryNetSwitch() {
+        if (switchOffManually)
+            return
 
-    fun msgParser(msg: String) {
-//        logAppend("receive msg: $msg")
-        val task = msg.json2task()
+        runOnUiThread {
+            netSwitcher.performClick()
+        }
+        Thread.sleep(5000)
+        runOnUiThread {
+            netSwitcher.performClick()
+        }
+        switchOffManually = true
+    }
+
+
+    var duration: Long = 0
+
+    fun msgParser(msg: ByteArray) {
+        taskParser(msg.toTask())
+//        logAppend("Duration: ${duration}")
+    }
+
+    fun taskParser(task: Task) {
         if (task.cmd == "Message") {
-            logAppend("Msg: ${task.data}")
+            logAppend("Msg: ${task.meta}")
         } else {
             worker.addTask(task)
             var res = Task()
-            val duration = measureTimeMillis { res = worker.work() }
+            val duration = measureTimeMillis {
+                res = worker.work()
+            }
             res.waitCount = duration.toInt()
-            logAppend("${res.cmd} ${res.meta} done: " + duration + "ms")
+            webSocket.sendMessage(res)
+            logAppend("${res.cmd} [${res.meta}] done: " + duration + "ms")
 //            val res = worker.result
 
 //            val sendMsg = res.task2json()
 //            logAppend("sending msg: $sendMsg")
-            webSocket.sendMessage(res.task2json())
         }
-
     }
 
 }
@@ -76,7 +105,7 @@ class MainActivity : AppCompatActivity() {
 class Worker {
 //    var data: IntArray
 
-    private var taskBuffer: MutableList<Task> = mutableListOf()
+    var taskBuffer: MutableList<Task> = mutableListOf()
 //    var result: String? = null
 //    @Volatile var result: Task? = null
 
@@ -93,11 +122,11 @@ class Worker {
 //        val (cmd, data) = task
 //        var resCmd = cmd
 
-        val resData: String = when (task.cmd) {
+        val resData = when (task.cmd) {
             "QSRT" -> qsort(task.data)
             "MSRT" -> msort(task.data)
             "NOP" -> nop(task.data)
-            else -> "CMD not understood!"
+            else -> "CMD not understood!".toByteArray()
         }
         val tt = task
         tt.data = resData
@@ -105,14 +134,14 @@ class Worker {
         return tt
     }
 
-    private fun qsort(data: String): String {
+    fun qsort(data: ByteArray): ByteArray {
 //        data.sorted()
-        return data.json2arr().sortedArray().arr2json()
+        return data.toIArr().sortedArray().toBAarr()
     }
 
-    private fun msort(data: String): String {
+    fun msort(data: ByteArray): ByteArray {
 //        data.sorted()
-        val a = data.json2arr()
+        val a = data.toIArr()
         val size = a.size
         val mid = size / 2
 //        val high = size
@@ -127,13 +156,10 @@ class Worker {
         while (i < mid) temp[k++] = a[i++]
         while (j < size) temp[k++] = a[j++]
 
-        return temp.arr2json()
+        return temp.toBAarr()
     }
 
-    private fun nop(data: String): String {
-//        val a = data.json2arr()
-//        a[0] = 1    // avoid compiler optimization
-//        return a.arr2json()
+    fun nop(data: ByteArray): ByteArray {
         return data
     }
 

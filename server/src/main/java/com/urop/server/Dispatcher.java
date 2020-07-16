@@ -4,6 +4,7 @@ import com.urop.common.Task;
 
 import org.java_websocket.WebSocket;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.urop.common.UtilsKt.task2json;
+import static com.urop.common.UtilsKt.toBArr;
+import static com.urop.common.UtilsKt.toIArr;
 import static com.urop.server.Utils.logAppend;
 //import static com.urop.server.Utils.
 
@@ -23,8 +25,7 @@ public class Dispatcher implements Runnable {
     volatile Map<WebSocket, Task> executingTasks;
     volatile Collection<String> finishedTasks;
 
-    volatile Map<WebSocket, Integer> timespent;
-//    Server server;
+    volatile Map<WebSocket, Integer> realWorkingTime;
 
     Dispatcher() {
         availNodes = new LinkedList<>();
@@ -32,19 +33,8 @@ public class Dispatcher implements Runnable {
         pendingTasks = new LinkedList<>();
         executingTasks = new HashMap<>();
         finishedTasks = new HashSet<>();
-        timespent = new HashMap<>();
+        realWorkingTime = new HashMap<>();
 //        server = s;
-    }
-
-    private synchronized void loopDispatch() {
-        while (!availNodes.isEmpty() && !pendingTasks.isEmpty()) {
-            WebSocket avail = availNodes.remove(0);
-            Task t = pendingTasks.remove(0);
-            avail.send(task2json(t));
-//            logAppend("send: " + task2json(t));
-            busyNodes.add(avail);
-            executingTasks.put(avail, t);
-        }
     }
 
     public void dispatch() {
@@ -54,19 +44,14 @@ public class Dispatcher implements Runnable {
                     WebSocket avail = availNodes.remove(0);
 
                     Task t = pendingTasks.remove(0);
-                    avail.send(task2json(t));
+                    avail.send(toBArr(t));
 //            logAppend("send: " + task2json(t));
                     busyNodes.add(avail);
                     executingTasks.put(avail, t);
 //                    logAppend(t.meta + " added to executing");
                 }
 //                logAppend("wait");
-                try {
-                    this.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-//                    logAppend("recover");
-                }
+                safeWait();
             }
         }
     }
@@ -76,25 +61,18 @@ public class Dispatcher implements Runnable {
         return executingTasks.isEmpty() && pendingTasks.isEmpty();
     }
 
-//    public boolean isTaskFinished(String str){
-//        return finishedTasks.contains(str);
-//    }
 
-    public void blockUntilAllTasksFinish() {
-        try {
-            synchronized (this) {
-                while (!isAllTasksFinished()) {
-                    this.wait();
-                }
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public synchronized void blockUntilAllTasksFinish() {
+        while (!isAllTasksFinished()) {
+            safeWait();
         }
     }
 
-    public synchronized void printTaskCount() {
-        logAppend("Pending: " + pendingTasks.size() +
-                ". Executing: " + executingTasks.size());
+    public synchronized void blockUntilSomeNodeConnect(int wait) {
+        while (numOfNode() < wait) {
+            logAppend("Waiting for any nodes to connect...");
+            safeWait();
+        }
     }
 
     public synchronized boolean commitTask(WebSocket conn, Task t) {
@@ -113,7 +91,7 @@ public class Dispatcher implements Runnable {
         Task rem = executingTasks.remove(conn);
         if (rem == null) {
             logAppend("executingTasks removal failed!");
-            logAppend("Task: " + t.cmd + t.meta);
+            logAppend("Task: " + t.cmd + Arrays.toString(toIArr(t.meta)));
             return false;
         } else {
             assert rem.meta.equals(t.meta);
@@ -121,13 +99,11 @@ public class Dispatcher implements Runnable {
         }
         finishedTasks.add(t.meta);
 
-        Integer ws = timespent.getOrDefault(conn, 0);
+        Integer ws = realWorkingTime.getOrDefault(conn, 0);
         ws += t.waitCount;
-        timespent.put(conn, ws);
+        realWorkingTime.put(conn, ws);
 
         this.notifyAll();
-        if (isAllTasksFinished()) {
-        }
 
 //        printTaskCount();
         return true;
@@ -156,16 +132,24 @@ public class Dispatcher implements Runnable {
     }
 
 
-    public boolean hasNode() {
-        return !availNodes.isEmpty() || !busyNodes.isEmpty();
+    public int numOfNode() {
+        return availNodes.size() + busyNodes.size();
     }
 
-    public Map<WebSocket, Integer> getTimespent() {
-        return timespent;
+    public Map<WebSocket, Integer> getRealWorkingTime() {
+        return realWorkingTime;
     }
 
     @Override
     public void run() {
         dispatch();
+    }
+
+    public void safeWait() {
+        try {
+            this.wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

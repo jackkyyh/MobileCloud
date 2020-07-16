@@ -28,11 +28,12 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
         logAppend(getAddress(conn) + ": disconnected.");
         server.nodeDisconnect(conn);
     }
-//    @Override
-//    public void onMessage( WebSocket conn, ByteBuffer message ) {
-//        broadcast( message.array() );
-//        System.out.println( getAddress(conn) + ": " + message );
-//    }
+
+    @Override
+    public void onMessage(WebSocket conn, String message) {
+        logAppend("Received a String!!!");
+    }
+
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
@@ -44,29 +45,17 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
     @Override
     public void onError(WebSocket conn, Exception ex) {
         ex.printStackTrace();
-//        if (conn != null) {
-        // some errors like port binding failed may not be assignable to a specific websocket
-//        }
     }
 
     @Override
     public void onStart() {
-//        System.out.println("Server started.");
-//        setConnectionLostTimeout(0);
         setConnectionLostTimeout(100);
     }
 
-    @Override
-    public void onMessage(WebSocket conn, String message) {
-//        logAppend("msg" + message);
-//        conn.send(message);
-        server.msgParser(conn, message);
-//        System.out.println(getAddress(conn) + ": " + message);
-    }
 
     @Override
     public void onMessage(WebSocket conn, ByteBuffer message) {
-        super.onMessage(conn, message);
+        server.msgParser(conn, message);
     }
 
 
