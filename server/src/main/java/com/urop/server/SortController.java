@@ -1,6 +1,6 @@
 package com.urop.server;
 
-import com.google.gson.Gson;
+
 import com.urop.common.Task;
 
 import org.java_websocket.WebSocket;
@@ -19,16 +19,15 @@ import static com.urop.server.Utils.logAppend;
 
 public class SortController implements TaskController {
 
-    final int MIN_SEG_LENGTH = 5000;
-    final int ARR_LENGTH = 1000000;
+    final int MIN_SEG_LENGTH = 5000000;
+    final int ARR_LENGTH = 5000000;
+    final int WAIT_FOR = 1;
     public int[] arr;
-    Gson gson;
     Dispatcher dispatcher;
     volatile Map<String, Collection<Task>> blockedTasks;
 
 
     SortController() {
-        gson = new Gson();
         blockedTasks = new HashMap<>();
 
         Random r = new Random();
@@ -51,27 +50,10 @@ public class SortController implements TaskController {
         sort(start, middle);
         sort(middle, end);
 
-//        while (!dispatcher.allTasksFinished()) {
-//            try{
-//                Thread.sleep(1000);
-//            } catch (InterruptedException ex){
-//                logAppend(ex.getMessage());
-//            }
-//            logAppend("testing failed");
-//        }
-//        dispatcher.printTaskCount();
-//        try{
-//            wait();
-//        } catch (InterruptedException ex){
-//            logAppend(ex.getMessage());
-//        }
-//        logAppend("all task finished");
 
         String dep1 = arr2json(new int[]{start, middle});
         String dep2 = arr2json(new int[]{middle, end});
-//        while(!dispatcher.isTaskFinished(dep1) || !dispatcher.isTaskFinished(dep2)){}
         Task t = createTask("MSRT", start, end);
-//        String dep1 = createHeader()
         addBlockedTask(dep1, t);
         addBlockedTask(dep2, t);
     }
@@ -95,22 +77,12 @@ public class SortController implements TaskController {
         } else {
             set.add(t);
         }
-
-//        logAppend();
     }
 
     public Task createTask(String header, int start, int end) {
         int[] meta = {start, end};
         String jsonMeta = arr2json(meta);
         return new Task(header, null, jsonMeta);
-
-//        int[] subarr = Arrays.copyOfRange(arr, start, end);
-//        String jsonArr = arr2json(subarr);
-//        String header = "MSRT";
-
-        //        dispatcher.addTask(t);
-//        logAppend("task " + header + arr2json(meta) + " created");
-//        dispatcher.loopDispatch();
     }
 
     @Override
@@ -163,7 +135,7 @@ public class SortController implements TaskController {
             return;
         }
 
-        blockUntilAnyNodeConnect();
+        blockUntilSomeNodesConnect(WAIT_FOR);
 //        logAppend("A node connected");
 
         long startTime = System.currentTimeMillis();
@@ -178,7 +150,7 @@ public class SortController implements TaskController {
         logAppend("Done. Time: " + (endTime - startTime) + "ms");
 
 
-        if (true) {
+        if (checkSortResult()) {
             logAppend("Check succeeded!");
         } else {
             logAppend("Check failed!");
@@ -193,9 +165,6 @@ public class SortController implements TaskController {
 
 
     public void blockUntilAllTasksFinish() {
-//        while(!blockedTasks.isEmpty()){};
-//        dispatcher.blockUntilAllTasksFinish();
-
 
         try {
             synchronized (this) {
@@ -209,11 +178,11 @@ public class SortController implements TaskController {
         dispatcher.blockUntilAllTasksFinish();
     }
 
-    public void blockUntilAnyNodeConnect() {
+    public void blockUntilSomeNodesConnect(int num) {
         try {
             synchronized (dispatcher) {
-                while (!dispatcher.hasNode()) {
-                    logAppend("Waiting for any nodes to connect...");
+                while (dispatcher.numOfNode() < num) {
+                    logAppend("Waiting for more nodes to connect...");
                     dispatcher.wait();
                 }
             }

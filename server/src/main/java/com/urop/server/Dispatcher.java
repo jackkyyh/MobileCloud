@@ -156,8 +156,8 @@ public class Dispatcher implements Runnable {
     }
 
 
-    public boolean hasNode() {
-        return !availNodes.isEmpty() || !busyNodes.isEmpty();
+    public int numOfNode() {
+        return availNodes.size() + busyNodes.size();
     }
 
     public Map<WebSocket, Integer> getTimespent() {
