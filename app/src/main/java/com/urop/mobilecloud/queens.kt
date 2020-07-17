@@ -30,7 +30,7 @@ fun recQueens(board: Chessboard, c: Int, re: Int): Set<Chessboard> {
         return hashSetOf(board)
     }
     val allAns = HashSet<Chessboard>()
-    for (new in 0 until board.size) {
+    for (new in board.indices) {
         var ok = true
         for (i in 0 until c) {
             if (board[i] == new || board[i] + i == new + c || board[i] - i == new - c) {

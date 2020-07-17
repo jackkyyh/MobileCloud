@@ -13,26 +13,30 @@ import static com.urop.server.Utils.logAppend;
 public class QueenController extends TaskController {
 
     int numOfSolution;
+    final int N = 8;
+    final int step = 2;
 
     @Override
     void reallyRun() {
-        int[] arr = new int[8];
+        int[] arr = new int[N];
         Task t = new Task("QUEEN");
-        t.meta = toJson(new int[]{15, 7});
+        t.meta = toJson(new int[]{N, step});
         t.data = toBArr(arr);
         dispatcher.addPendingTask(t);
     }
 
     @Override
     boolean checkResult() {
-        logAppend(Integer.toString(numOfSolution));
+        logAppend("num of solution: " + numOfSolution);
         return true;
     }
 
     @Override
     public void commitTask(WebSocket conn, Task t) {
 
+//        logAppend("recieved");
         int[][] res = toIntArr2d(t.data);
+//        logAppend("parsed");
 
 
         if (toIArr(t.meta)[0] == 0 && res.length > 0) {
@@ -47,10 +51,7 @@ public class QueenController extends TaskController {
 //                logAppend("new task created");
             }
         }
-//        logAppend("num of solution: " + res.length);
         super.commitTask(conn, t);
 
-
-//        dispatcher.addPendingTask(t);
     }
 }

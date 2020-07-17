@@ -16,7 +16,7 @@ public abstract class TaskController implements Runnable {
 
     public TaskController() {
 
-        WAIT_FOR = 1;
+        WAIT_FOR = 3;
         dispatcher = Server.getServer().getDispatcher();
     }
 

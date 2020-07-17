@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
     var duration: Long = 0
 
     fun msgParser(msg: ByteArray) {
-        logAppend("Get a msg")
+//        logAppend("Get a msg")
         taskParser(msg.toTask())
 //        logAppend("Duration: ${duration}")
     }
@@ -90,8 +90,8 @@ class MainActivity : AppCompatActivity() {
                 res = worker.work()
             }
             res.waitCount = duration.toInt()
-            webSocket.sendMessage(res)
             logAppend("${res.cmd} ${res.id} done: " + duration + "ms")
+            webSocket.sendMessage(res)
 //            val res = worker.result
 
 //            val sendMsg = res.task2json()
