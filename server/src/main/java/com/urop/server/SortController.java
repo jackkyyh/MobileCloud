@@ -113,7 +113,7 @@ public class SortController extends TaskController {
 
         logAppend("receive: " + t.id);
         int[] res = toIArr(t.data);
-        logAppend("parse done");
+//        logAppend("parse done");
         int index = decodeID(t.id)[0];
 //        logAppend("index = "+index);
         int i = 0;

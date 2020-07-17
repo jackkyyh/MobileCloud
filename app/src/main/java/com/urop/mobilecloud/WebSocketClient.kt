@@ -9,7 +9,7 @@ import okio.ByteString.Companion.toByteString
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 
-class WebSocketClient(val mainActivity: MainActivity) {
+class WebSocketClient(private val mainActivity: MainActivity) {
     //    private val TAG = WebSocketClient::class.java.simpleName
     private val client: OkHttpClient = OkHttpClient.Builder()
         .writeTimeout(5, TimeUnit.SECONDS)
@@ -27,10 +27,6 @@ class WebSocketClient(val mainActivity: MainActivity) {
             client.newWebSocket(request, SocketListener(this))
     }
 
-    fun sendMessage(message: String) {
-        mWebSocket!!.send(message)
-//        logAppend("Sent: $message")
-    }
 
     fun sendMessage(message: ByteBuffer) {
         mWebSocket!!.send(message.toByteString())
@@ -51,12 +47,11 @@ class WebSocketClient(val mainActivity: MainActivity) {
     }
 
     fun msgParser(msg: ByteArray) {
-//        logAppend("get a msg")
         mainActivity.msgParser(msg)
     }
 
     fun failure() {
-//        mainActivity.retryNetSwitch()
+        mainActivity.retryNetSwitch()
     }
 
     internal class SocketListener(var wsClient: WebSocketClient) : WebSocketListener() {
