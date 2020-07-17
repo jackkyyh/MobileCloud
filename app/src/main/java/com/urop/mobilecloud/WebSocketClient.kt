@@ -3,8 +3,13 @@ package com.urop.mobilecloud
 
 import com.urop.common.Task
 import com.urop.common.toBB
-import okhttp3.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 
@@ -32,7 +37,7 @@ class WebSocketClient(val mainActivity: MainActivity) {
     }
 
     fun sendMessage(message: ByteBuffer) {
-        mWebSocket!!.send(ByteString.of(message))
+        mWebSocket!!.send(message.toByteString())
 //        logAppend("Sent: $message")
     }
 

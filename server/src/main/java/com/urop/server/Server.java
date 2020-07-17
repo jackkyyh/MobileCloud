@@ -53,7 +53,9 @@ public class Server {
 
         taskController = r;
 
-        new Thread(taskController).start();
+//        Thread t1 = new Thread()
+        new Thread(taskController, "sorter").start();
+        new Thread(dispatcher, "dispatcher").start();
 //        tDispatch;
 //        tSort.start();
 

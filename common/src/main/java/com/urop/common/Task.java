@@ -8,9 +8,9 @@ public class Task {
 
     public Task(String cmd, String meta) {
         this.cmd = cmd;
-        this.data = new byte[0];
+        this.data = null;
         this.meta = meta;
-        this.waitCount = 2;
+        this.waitCount = 0;
     }
 
     public Task() {

@@ -61,6 +61,13 @@ public class Dispatcher implements Runnable {
         return executingTasks.isEmpty() && pendingTasks.isEmpty();
     }
 
+    public synchronized boolean isTaskFinished(String[] task) {
+        return finishedTasks.containsAll(Arrays.asList(task));
+    }
+
+    public synchronized boolean isTaskFinished(String task) {
+        return finishedTasks.contains(task);
+    }
 
     public synchronized void blockUntilAllTasksFinish() {
         while (!isAllTasksFinished()) {

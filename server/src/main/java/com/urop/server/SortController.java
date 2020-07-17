@@ -21,7 +21,7 @@ import static com.urop.server.Utils.logAppend;
 public class SortController implements TaskController {
 
     final int ARR_LENGTH = 1000000;
-    final int MIN_SEG_LENGTH = 500000;
+    final int MIN_SEG_LENGTH = 100000;
     public int[] arr;
 
     final int WAIT_FOR = 1;
@@ -64,27 +64,38 @@ public class SortController implements TaskController {
 //        String dep1 = createHeader()
         String dep1 = encodeMeta(start, middle);
         String dep2 = encodeMeta(middle, end);
-        addBlockedTask(dep1, t);
-        addBlockedTask(dep2, t);
+        addBlockedTask(new String[]{dep1, dep2}, t);
+//        addBlockedTask(dep2, t);
     }
 
 
-    synchronized void addBlockedTask(String depend, Task t) {
+    synchronized void addBlockedTask(String[] depend, Task t) {
         if (depend == null) {
             fillTaskData(t);
             dispatcher.addPendingTask(t);
             return;
         }
 
-        Collection<Task> set = blockedTasks.get(depend);
-        if (set == null) {
-            set = new HashSet<>();
-            set.add(t);
-            blockedTasks.put(depend, set);
+        for (String dep : depend) {
+            if (!dispatcher.isTaskFinished(dep)) {
+                Collection<Task> set = blockedTasks.get(dep);
+                if (set == null) {
+                    set = new HashSet<>();
+                    set.add(t);
+                    blockedTasks.put(dep, set);
 //            logAppend("blocked task created");
-        } else {
-            set.add(t);
+                } else {
+                    set.add(t);
+                }
+                t.waitCount++;
+            }
         }
+
+        if (t.waitCount == 0) {
+            fillTaskData(t);
+            dispatcher.addPendingTask(t);
+        }
+
 //        logAppend("[" + t.meta + "] depends on [" + depend + "]");
     }
 
@@ -105,7 +116,7 @@ public class SortController implements TaskController {
     @Override
     public synchronized void submitTask(WebSocket conn, Task t) {
 
-//        logAppend("receive: [" + t.meta + "]");
+        logAppend("receive: [" + t.meta + "]");
         int[] res = toIArr(t.data);
         int index = decodeMeta(t.meta)[0];
 //        logAppend("index = "+index);
@@ -155,11 +166,7 @@ public class SortController implements TaskController {
         long startTime = System.currentTimeMillis();
 
         sort(0, arr.length);
-        new Thread(dispatcher).start();
-//        synchronized (dispatcher){
-//            dispatcher.safeWait();
-//        }
-//        dispatcher.notifyAll();
+
         blockUntilAllTasksFinish();
 
         long endTime = System.currentTimeMillis();
