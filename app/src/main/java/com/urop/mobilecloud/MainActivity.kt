@@ -3,8 +3,6 @@ package com.urop.mobilecloud
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.urop.common.Task
-import com.urop.common.toBAarr
-import com.urop.common.toIArr
 import com.urop.common.toTask
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
@@ -16,7 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     private var logString: String = ""
     private val webSocket = WebSocketClient(this)
-    private val worker = Worker()
+    private val worker = Solver()
 
     var switchOffManually = false
 
@@ -77,13 +75,14 @@ class MainActivity : AppCompatActivity() {
     var duration: Long = 0
 
     fun msgParser(msg: ByteArray) {
+        logAppend("Get a msg")
         taskParser(msg.toTask())
 //        logAppend("Duration: ${duration}")
     }
 
     fun taskParser(task: Task) {
         if (task.cmd == "Message") {
-            logAppend("Msg: ${task.meta}")
+            logAppend("Msg: ${task.id}")
         } else {
             worker.addTask(task)
             var res = Task()
@@ -92,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             }
             res.waitCount = duration.toInt()
             webSocket.sendMessage(res)
-            logAppend("${res.cmd} [${res.meta}] done: " + duration + "ms")
+            logAppend("${res.cmd} ${res.id} done: " + duration + "ms")
 //            val res = worker.result
 
 //            val sendMsg = res.task2json()
@@ -102,65 +101,3 @@ class MainActivity : AppCompatActivity() {
 
 }
 
-class Worker {
-//    var data: IntArray
-
-    var taskBuffer: MutableList<Task> = mutableListOf()
-//    var result: String? = null
-//    @Volatile var result: Task? = null
-
-
-    fun addTask(task: Task) {
-//        val t: Task =
-        taskBuffer.add(task)
-    }
-
-
-    fun work(): Task {
-        val task = taskBuffer.removeAt(0)
-
-//        val (cmd, data) = task
-//        var resCmd = cmd
-
-        val resData = when (task.cmd) {
-            "QSRT" -> qsort(task.data)
-            "MSRT" -> msort(task.data)
-            "NOP" -> nop(task.data)
-            else -> "CMD not understood!".toByteArray()
-        }
-        val tt = task
-        tt.data = resData
-//        Thread.sleep(100)
-        return tt
-    }
-
-    fun qsort(data: ByteArray): ByteArray {
-//        data.sorted()
-        return data.toIArr().sortedArray().toBAarr()
-    }
-
-    fun msort(data: ByteArray): ByteArray {
-//        data.sorted()
-        val a = data.toIArr()
-        val size = a.size
-        val mid = size / 2
-//        val high = size
-
-        val temp = IntArray(size)
-        var i = 0
-        var j = mid
-        var k = 0
-        while (i < mid && j < size) {
-            temp[k++] = if (a[i] < a[j]) a[i++] else a[j++]
-        }
-        while (i < mid) temp[k++] = a[i++]
-        while (j < size) temp[k++] = a[j++]
-
-        return temp.toBAarr()
-    }
-
-    fun nop(data: ByteArray): ByteArray {
-        return data
-    }
-
-}

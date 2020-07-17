@@ -3,11 +3,7 @@ package com.urop.mobilecloud
 
 import com.urop.common.Task
 import com.urop.common.toBB
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.WebSocket
-import okhttp3.WebSocketListener
+import okhttp3.*
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import java.nio.ByteBuffer
@@ -38,7 +34,7 @@ class WebSocketClient(val mainActivity: MainActivity) {
 
     fun sendMessage(message: ByteBuffer) {
         mWebSocket!!.send(message.toByteString())
-//        logAppend("Sent: $message")
+//        logAppend("Sent a msg")
     }
 
     fun sendMessage(message: Task) {
@@ -55,11 +51,12 @@ class WebSocketClient(val mainActivity: MainActivity) {
     }
 
     fun msgParser(msg: ByteArray) {
+//        logAppend("get a msg")
         mainActivity.msgParser(msg)
     }
 
     fun failure() {
-        mainActivity.retryNetSwitch()
+//        mainActivity.retryNetSwitch()
     }
 
     internal class SocketListener(var wsClient: WebSocketClient) : WebSocketListener() {

@@ -3,21 +3,22 @@ package com.urop.common;
 public class Task {
     public String cmd;
     public byte[] data;
-    public String meta; // id
+    static int globalID = 0;
+    public String meta;
     public int waitCount; // working time
+    public String id; // id, unmodifiable
 
-    public Task(String cmd, String meta) {
+    public Task(String cmd, String id) {
         this.cmd = cmd;
-        this.data = null;
-        this.meta = meta;
-        this.waitCount = 0;
+        this.id = id;
+    }
+
+    public Task(String cmd) {
+        this(cmd, Integer.toString(globalID++));
     }
 
     public Task() {
-        cmd = "EMPTY";
-        data = null;
-        meta = null;
-        waitCount = 0;
+        cmd = "NOP";
     }
 
     public static Task Greeting(String msg) {

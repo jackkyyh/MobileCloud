@@ -55,6 +55,7 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, ByteBuffer message) {
+//        logAppend("get a message");
         server.msgParser(conn, message);
     }
 

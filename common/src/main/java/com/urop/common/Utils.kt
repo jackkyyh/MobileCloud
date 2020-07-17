@@ -30,10 +30,14 @@ fun ByteArray.toIArr(): IntArray {
     return MyKryo.kryo.readObject(input, IntArray::class.java)
 }
 
-fun ByteArray.toString_(): String {
+fun ByteArray.toIntArr2d(): Array<IntArray> {
     val input = Input(this, 0, this.size)
-    return MyKryo.kryo.readObject(input, String::class.java)
+    return MyKryo.kryo.readObject(input, Array<IntArray>::class.java)
 }
+//fun ByteArray.toString_(): String {
+//    val input = Input(this, 0, this.size)
+//    return MyKryo.kryo.readObject(input, String::class.java)
+//}
 
 fun ByteArray.toTask(): Task {
     val input = Input(this, 0, this.size)
@@ -50,19 +54,25 @@ fun ByteBuffer.toIArr(): IntArray {
     return MyKryo.kryo.readObject(input, IntArray::class.java)
 }
 
-fun CharArray.toBAarr(): ByteArray {
+fun CharArray.toBArr(): ByteArray {
     val output = Output(MyKryo.BUFFER_SIZE)
     MyKryo.kryo.writeObject(output, this)
     return output.toBytes()
 }
 
-fun IntArray.toBAarr(): ByteArray {
+fun IntArray.toBArr(): ByteArray {
     val output = Output(MyKryo.BUFFER_SIZE)
     MyKryo.kryo.writeObject(output, this)
     return output.toBytes()
 }
 
-fun String.toBAarr(): ByteArray {
+fun Array<IntArray>.toBArr(): ByteArray {
+    val output = Output(MyKryo.BUFFER_SIZE)
+    MyKryo.kryo.writeObject(output, this)
+    return output.toBytes()
+}
+
+fun String.toBArr(): ByteArray {
     val output = Output(MyKryo.BUFFER_SIZE)
     MyKryo.kryo.writeObject(output, this)
     return output.toBytes()
@@ -74,9 +84,9 @@ fun Task.toBArr(): ByteArray {
     return output.toBytes()
 }
 
-fun IntArray.toBB(): ByteBuffer {
-    return ByteBuffer.wrap(this.toBAarr())
-}
+//fun IntArray.toBB(): ByteBuffer {
+//    return ByteBuffer.wrap(this.toBAarr())
+//}
 
 fun Task.toBB(): ByteBuffer {
     return ByteBuffer.wrap(this.toBArr())
@@ -100,6 +110,8 @@ object MyKryo {
         kryo.register(IntArray::class.java)
         kryo.register(ByteArray::class.java)
         kryo.register(String::class.java)
+        kryo.register(Array<IntArray>::class.java)
+//        kryo.register(BooleanArray::class.java)
         kryo.references = false
 //        kryo.instantiatorStrategy = StdInstantiatorStrategy()
 //        byteBuffer.

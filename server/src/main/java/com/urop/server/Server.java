@@ -7,7 +7,6 @@ import org.java_websocket.WebSocket;
 
 import java.nio.ByteBuffer;
 
-import static com.urop.common.UtilsKt.toBArr;
 import static com.urop.common.UtilsKt.toTask;
 import static com.urop.server.Utils.getAddress;
 import static com.urop.server.Utils.logAppend;
@@ -20,10 +19,8 @@ public class Server {
     TaskController taskController;
 
     final static Server theServer = new Server();
-    final boolean KRYO;
 
     private Server() {
-        KRYO = true;
         int port = 9544;
         webSocketServer = new WebSocketServer(port, this);
         webSocketServer.start();
@@ -35,9 +32,9 @@ public class Server {
 
     public static void main(String[] args) {
 //        TaskController sorter = new NopController();
-        TaskController sorter = new SortController();
-
-        getServer().run(sorter);
+//        TaskController sorter = new SortController();
+        TaskController queen = new QueenController();
+        getServer().run(queen);
     }
 
     public static Server getServer() {
@@ -62,7 +59,8 @@ public class Server {
     }
 
     public void newNode(WebSocket conn) {
-        conn.send(toBArr(Task.Greeting("Greetings from the server!"))); //This method sends a message to the new client
+//        conn.send(toBArr(Task.Greeting("Greetings from the server!")));
+//        logAppend("sent a msg");
 
         dispatcher.addAvailNode(conn);
     }
@@ -70,10 +68,11 @@ public class Server {
     public void msgParser(WebSocket conn, ByteBuffer msg) {
         Task task = toTask(msg);
         if (task.cmd.equals("Message")) {
-            logAppend(getAddress(conn) + ": " + task.meta);
+            logAppend(getAddress(conn) + ": " + task.id);
         } else {
-            taskController.submitTask(conn, task);
+            taskController.commitTask(conn, task);
         }
+
     }
 
     public Dispatcher getDispatcher() {

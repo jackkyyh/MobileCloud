@@ -45,6 +45,7 @@ public class Dispatcher implements Runnable {
 
                     Task t = pendingTasks.remove(0);
                     avail.send(toBArr(t));
+//                    logAppend("sent a msg");
 //            logAppend("send: " + task2json(t));
                     busyNodes.add(avail);
                     executingTasks.put(avail, t);
@@ -98,13 +99,13 @@ public class Dispatcher implements Runnable {
         Task rem = executingTasks.remove(conn);
         if (rem == null) {
             logAppend("executingTasks removal failed!");
-            logAppend("Task: " + t.cmd + Arrays.toString(toIArr(t.meta)));
+            logAppend("Task: " + t.cmd + Arrays.toString(toIArr(t.id)));
             return false;
         } else {
-            assert rem.meta.equals(t.meta);
+            assert rem.id.equals(t.id);
 //            logAppend(t.meta + " removed from executing");
         }
-        finishedTasks.add(t.meta);
+        finishedTasks.add(t.id);
 
         Integer ws = realWorkingTime.getOrDefault(conn, 0);
         ws += t.waitCount;

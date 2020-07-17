@@ -1,5 +1,4 @@
 import com.urop.common.Task
-import com.urop.common.toBAarr
 import com.urop.common.toBArr
 import java.util.*
 import kotlin.system.measureTimeMillis
@@ -25,9 +24,9 @@ for (i in 0 until ARR_LENGTH) {
 
 
 val t = Task()
-println(measureTimeMillis { arr.toBAarr() })
+println(measureTimeMillis { arr.toBArr() })
 println(measureTimeMillis {
-    t.data = arr.toBAarr()
+    t.data = arr.toBArr()
     t.toBArr()
 })
 
