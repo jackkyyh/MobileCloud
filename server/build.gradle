@@ -11,7 +11,7 @@ mainClassName = 'com.urop.server.Server'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation('org.slf4j:slf4j-simple:1.7.29')
+    implementation('org.slf4j:slf4j-simple:1.7.30')
     implementation("org.java-websocket:Java-WebSocket:1.5.1")
 
     implementation project(path: ':common')

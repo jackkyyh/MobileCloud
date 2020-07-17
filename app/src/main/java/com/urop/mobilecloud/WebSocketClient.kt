@@ -1,7 +1,16 @@
 package com.urop.mobilecloud
 
 
-import okhttp3.*
+import com.urop.common.Task
+import com.urop.common.toBB
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 
 class WebSocketClient(val mainActivity: MainActivity) {
@@ -20,13 +29,20 @@ class WebSocketClient(val mainActivity: MainActivity) {
             .build()
         mWebSocket =
             client.newWebSocket(request, SocketListener(this))
-
-        logAppend("Connection starts")
     }
 
     fun sendMessage(message: String) {
         mWebSocket!!.send(message)
 //        logAppend("Sent: $message")
+    }
+
+    fun sendMessage(message: ByteBuffer) {
+        mWebSocket!!.send(message.toByteString())
+//        logAppend("Sent: $message")
+    }
+
+    fun sendMessage(message: Task) {
+        sendMessage(message.toBB())
     }
 
     fun close(code: Int, reason: String?) {
@@ -38,54 +54,34 @@ class WebSocketClient(val mainActivity: MainActivity) {
         mainActivity.logAppend((str))
     }
 
-    fun msgParser(msg: String) {
-//        mWebSocket!!.send(msg)
-//        logAppend("Get a msg")
+    fun msgParser(msg: ByteArray) {
         mainActivity.msgParser(msg)
     }
 
-    internal class SocketListener(var webSocket: WebSocketClient) : WebSocketListener() {
+    fun failure() {
+        mainActivity.retryNetSwitch()
+    }
 
-        override fun onMessage(webSocket: WebSocket, text: String) {
-            super.onMessage(webSocket, text)
-            msgParser(text)
-//            webSocket.send(text)
+    internal class SocketListener(var wsClient: WebSocketClient) : WebSocketListener() {
+
+
+        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+            super.onMessage(webSocket, bytes)
+            msgParser(bytes.toByteArray())
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             super.onFailure(webSocket, t, response)
             logAppend("Failure: " + t.message)
+            wsClient.failure()
         }
 
         fun logAppend(str: String) {
-            webSocket.logAppend((str))
+            wsClient.logAppend((str))
         }
 
-        fun msgParser(msg: String) {
-            webSocket.msgParser(msg)
+        fun msgParser(msg: ByteArray) {
+            wsClient.msgParser(msg)
         }
-
-//        override fun onOpen(webSocket: WebSocket, response: Response) {
-//            super.onOpen(webSocket, response)
-//        }
-//        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-//            super.onMessage(webSocket, bytes)
-//            Log.i(TAG, "onMessage bytes=$bytes")
-//        logAppend("Msg: $bytes")
-//    }
-
-//        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-//            super.onClosing(webSocket, code, reason)
-//
-//        }
-
-//        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-//            super.onClosed(webSocket, code, reason)
-//        }
-
     }
-
-//    fun sendMessage(t: Task) {
-//        sendMessage(t.task2json())
-//    }
 }
