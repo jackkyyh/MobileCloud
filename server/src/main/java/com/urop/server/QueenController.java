@@ -1,8 +1,7 @@
 package com.urop.server;
 
+import com.esotericsoftware.kryonet.Connection;
 import com.urop.common.Task;
-
-import org.java_websocket.WebSocket;
 
 import static com.urop.common.SerializerKt.toIArr;
 import static com.urop.common.SerializerKt.toIntArr2d;
@@ -41,7 +40,7 @@ public class QueenController extends TaskController {
     }
 
     @Override
-    public void commitTask(WebSocket conn, Task t) {
+    public void commitTask(Connection conn, Task t) {
 
 //        logAppend("recieved");
         int[][] res = toIntArr2d(t.bArrData);

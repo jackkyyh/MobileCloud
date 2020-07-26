@@ -1,6 +1,6 @@
 package com.urop.server;
 
-import org.java_websocket.WebSocket;
+import com.esotericsoftware.kryonet.Connection;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,8 +12,8 @@ public class Utils {
 //    private GsonTaskConverter(){};
 
 
-    public static String getAddress(WebSocket conn) {
-        return conn.getRemoteSocketAddress().getAddress().getHostAddress();
+    public static String getAddress(Connection conn) {
+        return conn.getRemoteAddressTCP().getHostName();
     }
 
     public static void logAppend(String text) {

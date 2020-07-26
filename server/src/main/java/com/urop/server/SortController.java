@@ -1,8 +1,7 @@
 package com.urop.server;
 
+import com.esotericsoftware.kryonet.Connection;
 import com.urop.common.Task;
-
-import org.java_websocket.WebSocket;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -115,7 +114,7 @@ public class SortController extends TaskController {
     }
 
     @Override
-    public synchronized void commitTask(WebSocket conn, Task t) {
+    public synchronized void commitTask(Connection conn, Task t) {
 
 //        logAppend("receive: " + t.id);
         int[] res;

@@ -1,9 +1,7 @@
 package com.urop.server;
 
-import com.urop.common.SerializerKt;
+import com.esotericsoftware.kryonet.Connection;
 import com.urop.common.Task;
-
-import org.java_websocket.WebSocket;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,19 +13,18 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.urop.common.Profiler.profiler;
-import static com.urop.common.SerializerKt.toBArr;
 import static com.urop.common.SerializerKt.toIArr;
 import static com.urop.server.Utils.logAppend;
 
 public class Dispatcher implements Runnable {
 
-    List<WebSocket> availNodes;
-    List<WebSocket> busyNodes;
+    List<Connection> availNodes;
+    List<Connection> busyNodes;
     volatile List<Task> pendingTasks;
-    volatile Map<WebSocket, Task> executingTasks;
+    volatile Map<Connection, Task> executingTasks;
     volatile Collection<String> finishedTasks;
 
-    volatile Map<WebSocket, Integer> realWorkingTime;
+    volatile Map<Connection, Integer> realWorkingTime;
 
     Dispatcher() {
         availNodes = new LinkedList<>();
@@ -44,11 +41,10 @@ public class Dispatcher implements Runnable {
         while (true) {
             synchronized (this) {
                 while (!availNodes.isEmpty() && !pendingTasks.isEmpty()) {
-                    WebSocket avail = availNodes.remove(0);
+                    Connection avail = availNodes.remove(0);
 
                     Task t = pendingTasks.remove(0);
-                    byte[] barr = profiler.add("serial", SerializerKt::toBArr, t);
-                    profiler.add("net send", () -> avail.send(barr));
+                    profiler.add("net send", () -> avail.sendTCP(t));
 //                    logAppend("sent a msg");
 //            logAppend("send: " + task2json(t));
                     busyNodes.add(avail);
@@ -83,7 +79,7 @@ public class Dispatcher implements Runnable {
         }
     }
 
-    public synchronized boolean commitTask(WebSocket conn, Task t) {
+    public synchronized boolean commitTask(Connection conn, Task t) {
 
         if (!busyNodes.remove(conn)) {
             logAppend("busyNodes removal failed!");
@@ -117,7 +113,7 @@ public class Dispatcher implements Runnable {
         return true;
     }
 
-    public synchronized void addAvailNode(WebSocket node) {
+    public synchronized void addAvailNode(Connection node) {
         availNodes.add(node);
 //        synchronized (this){
         this.notifyAll();
@@ -130,7 +126,7 @@ public class Dispatcher implements Runnable {
         this.notifyAll();
     }
 
-    public synchronized void removeNode(WebSocket conn) {
+    public synchronized void removeNode(Connection conn) {
         availNodes.remove(conn);
         busyNodes.remove(conn);
         Task t = executingTasks.remove(conn);
@@ -146,8 +142,7 @@ public class Dispatcher implements Runnable {
 
 
     public void broadcast(Task t) {
-        byte[] msg = toBArr(t);
-        Consumer<WebSocket> r = (conn) -> conn.send(msg);
+        Consumer<Connection> r = (conn) -> conn.sendTCP(t);
         availNodes.forEach(r);
         busyNodes.forEach(r);
     }

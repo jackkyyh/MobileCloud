@@ -41,6 +41,10 @@ public class Profiler {
     }
 
     public String dump() {
+        if (timeStats.isEmpty()) {
+            return "empty!";
+        }
+
         StringBuilder str = new StringBuilder();
 
         BiFunction<String, Long, String> produceEntry = (cat, t) ->

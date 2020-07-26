@@ -14,5 +14,8 @@ dependencies {
     implementation('org.slf4j:slf4j-simple:1.7.30')
     implementation("org.java-websocket:Java-WebSocket:1.5.1")
 
+    implementation "kryonet:kryonet:2.21"
+    implementation 'com.esotericsoftware:kryo:5.0.0-RC6'
+
     implementation project(path: ':common')
 }

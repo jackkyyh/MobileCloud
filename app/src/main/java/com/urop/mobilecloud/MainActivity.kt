@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.urop.common.Profiler.profiler
 import com.urop.common.Task
-import com.urop.common.toBB
 import com.urop.common.toTask
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
@@ -14,7 +13,9 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private var logString: String = ""
-    private val webSocket = WebSocketClient(this)
+
+    //    private val webSocket = WebSocketClient(this)
+    private val kn = KryoNetClient(this)
     private val solver = Solver()
 
     var switchOffManually = false
@@ -22,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        kn.start()
 
         logAppend("Welcome to Mobile Cloud!")
         logAppend("Tap Connect to start ... ")
@@ -38,11 +41,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun switchChecked(isChecked: Boolean) {
         if (isChecked) {
-            webSocket.connect("ws://192.168.10.143:9544")
-            webSocket.sendTask(Task.Message("Hi, this is ${android.os.Build.MODEL}"))
+            Thread {
+                kn.connect(5000, "192.168.10.143", 9544, 9566)
+                kn.sendTCP(Task.Message("Hi, this is ${android.os.Build.MODEL}"))
+
+            }.start()
+
+//            webSocket.connect("ws://192.168.10.143:9544")
+//            webSocket.sendTask(Task.Message("Hi, this is ${android.os.Build.MODEL}"))
             switchOffManually = false
         } else {
-            webSocket.close(4321, "bye")
+//            webSocket.close(4321, "bye")
             switchOffManually = true
         }
     }
@@ -69,8 +78,12 @@ class MainActivity : AppCompatActivity() {
         if (switchOffManually)
             return
 
+        if (!netSwitcher.isChecked) {
+            return
+        }
         runOnUiThread {
             netSwitcher.performClick()
+//            netSwitcher.
         }
         Thread.sleep(5000)
         runOnUiThread {
@@ -88,13 +101,14 @@ class MainActivity : AppCompatActivity() {
 //        logAppend("Duration: ${duration}")
     }
 
-    private fun taskParser(task: Task) {
+    fun taskParser(task: Task) {
         when (task.cmd) {
             "Message" -> {
                 logAppend("Msg: ${task.id}")
             }
             "Profile" -> {
-                webSocket.sendTask(Task.Message(profiler.dump()))
+//                logAppend("send ${profiler.dump()}")
+                kn.sendTCP(Task.Message(profiler.dump()))
             }
             else -> {
                 solver.addTask(task)
@@ -102,17 +116,13 @@ class MainActivity : AppCompatActivity() {
                 val dur = profiler.add("useful work") { res = solver.work() }
 
                 //            if(res.id[res.id.length-1] == '1'){
-                if (res.id.slice(0..2).equals("[0,")) {
-                    logAppend(
-                        "${res.cmd} ${res.id} done: "
-                                + dur + "ms"
-                    )
-                }
-                webSocket.sendMessage(
-                    profiler.add(
-                        "serial", Task::toBB, res
-                    )
+//                if (res.id.slice(0..2).equals("[0,")) {
+                logAppend(
+                    "${res.cmd} ${res.id} done: "
+                            + dur + "ms"
                 )
+//                }
+                kn.sendTCP(res)
                 //            val res = worker.result
 
                 //            val sendMsg = res.task2json()

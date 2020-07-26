@@ -1,11 +1,10 @@
 package com.urop.server;
 
+import com.esotericsoftware.kryonet.Connection;
 import com.urop.common.Task;
 
-import org.java_websocket.WebSocket;
-
 import static com.urop.common.Profiler.profiler;
-import static com.urop.server.Server.getServer;
+import static com.urop.server.Server.server;
 import static com.urop.server.Utils.logAppend;
 
 public abstract class TaskController implements Runnable {
@@ -17,7 +16,7 @@ public abstract class TaskController implements Runnable {
     public TaskController() {
         WAIT_FOR = 2;
 //        profile = false;
-        dispatcher = getServer().getDispatcher();
+        dispatcher = server.getDispatcher();
     }
 
 
@@ -56,7 +55,7 @@ public abstract class TaskController implements Runnable {
 
     abstract boolean checkResult();
 
-    void commitTask(WebSocket conn, Task t) {
+    void commitTask(Connection conn, Task t) {
         dispatcher.commitTask(conn, t);
     }
 

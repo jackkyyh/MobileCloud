@@ -1,8 +1,7 @@
 package com.urop.server;
 
+import com.esotericsoftware.kryonet.Connection;
 import com.urop.common.Task;
-
-import org.java_websocket.WebSocket;
 
 public class NopController extends TaskController {
 
@@ -18,7 +17,7 @@ public class NopController extends TaskController {
     }
 
     @Override
-    public void commitTask(WebSocket conn, Task t) {
+    public void commitTask(Connection conn, Task t) {
 
         dispatcher.commitTask(conn, t);
     }
