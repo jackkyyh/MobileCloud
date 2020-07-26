@@ -1,12 +1,13 @@
 package com.urop.common;
 
 public class Task {
-    public String cmd;
-    public byte[] data;
     static int globalID = 0;
-    public String meta;
+    final public String cmd;
+    final public String id; // id, unmodifiable
+    public int[] iArrData;
+    public byte[] bArrData;
     public int waitCount; // working time
-    public String id; // id, unmodifiable
+
 
     public Task(String cmd, String id) {
         this.cmd = cmd;
@@ -17,11 +18,13 @@ public class Task {
         this(cmd, Integer.toString(globalID++));
     }
 
+    public String strData; // explain data
+
     public Task() {
-        cmd = "NOP";
+        this("NOP");
     }
 
-    public static Task Greeting(String msg) {
-        return new Task("Message", msg);
+    public static Task Message(String message) {
+        return new Task("Message", message);
     }
 }

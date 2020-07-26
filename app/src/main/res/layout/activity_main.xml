@@ -18,18 +18,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginTop="5dp"
             android:text="Connect"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/clearLogBotton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:ellipsize="none"
             android:text="Clear log"
-            android:textSize="15sp" />
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/clearProfileBotton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:ellipsize="none"
+            android:text="Clear profile"
+            android:textSize="14sp" />
 
     </LinearLayout>
 

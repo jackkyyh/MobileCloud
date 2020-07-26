@@ -1,34 +1,36 @@
 package com.urop.mobilecloud
 
+
 import com.urop.common.Task
-import com.urop.common.toBArr
-import com.urop.common.toIArr
 
 
-fun qsort(t: Task): Task {
-//        data.sorted()
-    t.data = t.data.toIArr().sortedArray().toBArr()
-    return t
+val qsort: Task.() -> Unit = {
+//    iArrData = iArrData.sortedArray()
+    iArrData.sort()
 }
 
 fun msort(t: Task): Task {
-//        data.sorted()
-    val data = t.data
-    val a = data.toIArr()
-    val size = a.size
+    val arr = t.iArrData
+
+//    profiler.add("serial") { arr = t.iArrData.toIArr() }
+
+    val size = arr.size
+    val temp = IntArray(size)
+
     val mid = size / 2
 //        val high = size
 
-    val temp = IntArray(size)
     var i = 0
     var j = mid
     var k = 0
     while (i < mid && j < size) {
-        temp[k++] = if (a[i] < a[j]) a[i++] else a[j++]
+        temp[k++] = if (arr[i] < arr[j]) arr[i++] else arr[j++]
     }
-    while (i < mid) temp[k++] = a[i++]
-    while (j < size) temp[k++] = a[j++]
+    while (i < mid) temp[k++] = arr[i++]
+    while (j < size) temp[k++] = arr[j++]
 
-    t.data = temp.toBArr()
+    t.iArrData = temp
+//    profiler.add("deserial") { t.iArrData = temp }
+
     return t
 }

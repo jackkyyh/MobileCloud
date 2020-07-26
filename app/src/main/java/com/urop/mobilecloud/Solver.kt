@@ -6,32 +6,32 @@ import com.urop.common.Task
 class Solver {
 //    var data: IntArray
 
-    var taskBuffer: MutableList<Task> = mutableListOf()
+    private val taskBuffer: MutableList<Task> = mutableListOf()
 
 
     fun addTask(task: Task) {
-//        val t: Task =
         taskBuffer.add(task)
     }
 
-
     fun work(): Task {
         val task = taskBuffer.removeAt(0)
+        return work(task)
+    }
+
+    fun work(task: Task): Task {
 
         val tt = when (task.cmd) {
-            "QSRT" -> qsort(task)
+            "QSRT" -> task.apply(qsort)
             "MSRT" -> msort(task)
             "QUEEN" -> queens(task)
-            "NOP" -> nop(task)
+            "NOP" -> task
             else -> {
-                task.meta = "CMD not understood!"
+                task.strData = "CMD not understood!"
                 return task
             }
         }
+        Thread.sleep(10)
         return tt
     }
-}
 
-fun nop(t: Task): Task {
-    return t
 }

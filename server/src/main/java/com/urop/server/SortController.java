@@ -1,7 +1,6 @@
 package com.urop.server;
 
 import com.urop.common.Task;
-import com.urop.common.UtilsKt;
 
 import org.java_websocket.WebSocket;
 
@@ -12,34 +11,41 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 
-import static com.urop.common.UtilsKt.toIArr;
-import static com.urop.common.UtilsKt.toJson;
+import static com.urop.common.SerializerKt.toIArr;
+import static com.urop.common.SerializerKt.toJson;
 import static com.urop.server.Utils.logAppend;
 
 
 public class SortController extends TaskController {
 
-    final int ARR_LENGTH = 40000;
-    final int MIN_SEG_LENGTH = 10000;
+    final int MIN_SEG_LENGTH;
+    final int ARR_LENGTH;
     public int[] arr;
 
     volatile Map<String, Collection<Task>> blockedTasks;
 
 
-    SortController() {
+    public SortController() {
+        this(100000, 5000);
+    }
+
+    public SortController(int arrLength, int segLength) {
+
+        ARR_LENGTH = arrLength;
+        MIN_SEG_LENGTH = segLength;
 
         blockedTasks = new HashMap<>();
 
+//        profiler.add("init", ()->{
         Random r = new Random();
         arr = new int[ARR_LENGTH];
         for (int i = 0; i < ARR_LENGTH; i++) {
             arr[i] = r.nextInt(100);
         }
+//        });
+
 
 //        arr = new int[]{4,1,2,5,9,8,7,7,2};
-//        ARR_LENGTH = arr.length;
-//        MIN_SEG_LENGTH = 2;
-
     }
 
     void sort(int start, int end) {
@@ -111,9 +117,12 @@ public class SortController extends TaskController {
     @Override
     public synchronized void commitTask(WebSocket conn, Task t) {
 
-        logAppend("receive: " + t.id);
-        int[] res = toIArr(t.data);
+//        logAppend("receive: " + t.id);
+        int[] res;
+//        profiler.add("deserialization", ()->{res = toIArr(t.data);});
 //        logAppend("parse done");
+//        res = profiler.add("deserial(IntArr)", SerializerKt::toIArr, t.iArrData);
+        res = t.iArrData;
         int index = decodeID(t.id)[0];
 //        logAppend("index = "+index);
         int i = 0;
@@ -149,8 +158,16 @@ public class SortController extends TaskController {
     void fillTaskData(Task t) {
 
         int[] index = decodeID(t.id);
-        int[] subarr = Arrays.copyOfRange(arr, index[0], index[1]);
-        t.data = UtilsKt.toBArr(subarr);
+
+//        int[] subarr = profiler.add("arrayCopy",
+//                (ind)->{
+//            return Arrays.copyOfRange(arr, ind[0], ind[1]);}, index);
+
+//        t.data = profiler.add("serialization", UtilsKt::toBArr, subarr);
+//        profiler.add("serial(IntArr)", ()->{
+//            t.iArrData = SerializerKt.toBArr(subarr);
+//        });
+        t.iArrData = Arrays.copyOfRange(arr, index[0], index[1]);
     }
 
 

@@ -8,9 +8,6 @@ import java.nio.ByteBuffer
 
 val gson = Gson()
 
-fun String.toTask(): Task {
-    return gson.fromJson(this, Task::class.java)
-}
 
 fun String.toIArr(): IntArray {
     return gson.fromJson(this, IntArray::class.java)
@@ -118,4 +115,3 @@ object MyKryo {
     }
 
 }
-

@@ -4,21 +4,22 @@ import com.urop.common.Task;
 
 import org.java_websocket.WebSocket;
 
-import java.util.Map;
-
-import static com.urop.server.Utils.getAddress;
+import static com.urop.common.Profiler.profiler;
+import static com.urop.server.Server.getServer;
 import static com.urop.server.Utils.logAppend;
 
 public abstract class TaskController implements Runnable {
 
     final Dispatcher dispatcher;
-    final int WAIT_FOR;
+    int WAIT_FOR;
+    boolean doProfile;
 
     public TaskController() {
-
-        WAIT_FOR = 3;
-        dispatcher = Server.getServer().getDispatcher();
+        WAIT_FOR = 2;
+//        profile = false;
+        dispatcher = getServer().getDispatcher();
     }
+
 
     @Override
     public void run() {
@@ -26,15 +27,12 @@ public abstract class TaskController implements Runnable {
         dispatcher.blockUntilSomeNodeConnect(WAIT_FOR);
 
         logAppend("Starts...");
-        long startTime = System.currentTimeMillis();
 
-        reallyRun();
-
-        blockUntilAllTasksFinish();
-
-        long endTime = System.currentTimeMillis();
-        logAppend("Done. Time: " + (endTime - startTime) + "ms");
-
+        long time = profiler.add("total", () -> {
+            reallyRun();
+            blockUntilAllTasksFinish();
+        });
+        logAppend("All done. Time: " + time + "ms");
 
         if (checkResult()) {
             logAppend("Check succeeded!");
@@ -42,9 +40,12 @@ public abstract class TaskController implements Runnable {
             logAppend("Check failed!");
         }
 
-        Map<WebSocket, Integer> timespent = dispatcher.getRealWorkingTime();
-        timespent.forEach((conn, t) ->
-                logAppend(getAddress(conn) + " spent " + t + "ms."));
+//        Map<WebSocket, Integer> timespent = dispatcher.getRealWorkingTime();
+//        timespent.forEach((conn, t) ->
+//                logAppend(getAddress(conn) + " spent " + t + "ms."));
+
+        logAppend("Server profile:" + profiler.dump());
+        dispatcher.broadcast(new Task("Profile"));
     }
 
     void blockUntilAllTasksFinish() {
@@ -57,6 +58,10 @@ public abstract class TaskController implements Runnable {
 
     void commitTask(WebSocket conn, Task t) {
         dispatcher.commitTask(conn, t);
+    }
+
+    public void setWAIT_FOR(int W) {
+        WAIT_FOR = W;
     }
 
     void safeWait() {

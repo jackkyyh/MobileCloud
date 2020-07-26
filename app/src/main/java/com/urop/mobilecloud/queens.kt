@@ -12,16 +12,16 @@ typealias Chessboard = IntArray
 // meta: {remaining, step}
 fun queens(t: Task): Task {
 
-    val board = t.data.toIArr()
-    val meta = t.meta.toIArr()
+    val board = t.iArrData
+    val meta = t.strData.toIArr()
 
     val res = recQueens(board, board.size - meta[0], meta[1]).toTypedArray()
 //        repeat(meta[1]){
 
     val tmp = meta[0] - meta[1]
     meta[0] = if (tmp > 0) tmp else 0
-    t.meta = meta.toJson()
-    t.data = res.toBArr()
+    t.strData = meta.toJson()
+    t.bArrData = res.toBArr()
     return t
 }
 

@@ -1,5 +1,6 @@
 package com.urop.server;
 
+import com.urop.common.SerializerKt;
 import com.urop.common.Task;
 
 import org.java_websocket.WebSocket;
@@ -11,11 +12,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-import static com.urop.common.UtilsKt.toBArr;
-import static com.urop.common.UtilsKt.toIArr;
+import static com.urop.common.Profiler.profiler;
+import static com.urop.common.SerializerKt.toBArr;
+import static com.urop.common.SerializerKt.toIArr;
 import static com.urop.server.Utils.logAppend;
-//import static com.urop.server.Utils.
 
 public class Dispatcher implements Runnable {
 
@@ -34,6 +36,7 @@ public class Dispatcher implements Runnable {
         executingTasks = new HashMap<>();
         finishedTasks = new HashSet<>();
         realWorkingTime = new HashMap<>();
+
 //        server = s;
     }
 
@@ -44,7 +47,8 @@ public class Dispatcher implements Runnable {
                     WebSocket avail = availNodes.remove(0);
 
                     Task t = pendingTasks.remove(0);
-                    avail.send(toBArr(t));
+                    byte[] barr = profiler.add("serial", SerializerKt::toBArr, t);
+                    profiler.add("net send", () -> avail.send(barr));
 //                    logAppend("sent a msg");
 //            logAppend("send: " + task2json(t));
                     busyNodes.add(avail);
@@ -60,10 +64,6 @@ public class Dispatcher implements Runnable {
 
     public synchronized boolean isAllTasksFinished() {
         return executingTasks.isEmpty() && pendingTasks.isEmpty();
-    }
-
-    public synchronized boolean isTaskFinished(String[] task) {
-        return finishedTasks.containsAll(Arrays.asList(task));
     }
 
     public synchronized boolean isTaskFinished(String task) {
@@ -107,9 +107,9 @@ public class Dispatcher implements Runnable {
         }
         finishedTasks.add(t.id);
 
-        Integer ws = realWorkingTime.getOrDefault(conn, 0);
-        ws += t.waitCount;
-        realWorkingTime.put(conn, ws);
+//        Integer ws = realWorkingTime.getOrDefault(conn, 0);
+//        ws += t.waitCount;
+//        realWorkingTime.put(conn, ws);
 
         this.notifyAll();
 
@@ -144,8 +144,12 @@ public class Dispatcher implements Runnable {
         return availNodes.size() + busyNodes.size();
     }
 
-    public Map<WebSocket, Integer> getRealWorkingTime() {
-        return realWorkingTime;
+
+    public void broadcast(Task t) {
+        byte[] msg = toBArr(t);
+        Consumer<WebSocket> r = (conn) -> conn.send(msg);
+        availNodes.forEach(r);
+        busyNodes.forEach(r);
     }
 
     @Override

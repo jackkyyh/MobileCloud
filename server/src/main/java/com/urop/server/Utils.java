@@ -21,4 +21,11 @@ public class Utils {
         String curTime = new SimpleDateFormat("[HH:mm:ss:SSS] ", Locale.getDefault()).format(new Date());
         System.out.println(curTime + text);
     }
+
+//    public static long measureTimeMillis(Runnable r){
+//        long startTime = System.currentTimeMillis();
+//        r.run();
+//        long endTime = System.currentTimeMillis();
+//        return endTime-startTime;
+//    }
 }

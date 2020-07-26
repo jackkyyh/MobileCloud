@@ -19,6 +19,7 @@ public class NopController extends TaskController {
 
     @Override
     public void commitTask(WebSocket conn, Task t) {
+
         dispatcher.commitTask(conn, t);
     }
 }

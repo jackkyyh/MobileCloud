@@ -1,6 +1,7 @@
 package com.urop.mobilecloud
 
 
+import com.urop.common.Profiler.profiler
 import com.urop.common.Task
 import com.urop.common.toBB
 import okhttp3.*
@@ -33,8 +34,9 @@ class WebSocketClient(private val mainActivity: MainActivity) {
 //        logAppend("Sent a msg")
     }
 
-    fun sendMessage(message: Task) {
-        sendMessage(message.toBB())
+    fun sendTask(message: Task) {
+        val bb = profiler.add("serial", Task::toBB, message)
+        sendMessage(bb)
     }
 
     fun close(code: Int, reason: String?) {
