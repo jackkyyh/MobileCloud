@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.urop.common.Profiler.profiler
 import com.urop.common.Task
-import com.urop.common.toTask
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -92,14 +91,6 @@ class MainActivity : AppCompatActivity() {
         switchOffManually = true
     }
 
-    fun msgParser(msg: ByteArray) {
-//        logAppend("Get a msg")
-        var t = Task()
-        profiler.add("deserial") { t = msg.toTask() }
-//        logAppend("byte to task took $dur")
-        taskParser(t)
-//        logAppend("Duration: ${duration}")
-    }
 
     fun taskParser(task: Task) {
         when (task.cmd) {
@@ -107,7 +98,6 @@ class MainActivity : AppCompatActivity() {
                 logAppend("Msg: ${task.id}")
             }
             "Profile" -> {
-//                logAppend("send ${profiler.dump()}")
                 kn.sendTCP(Task.Message(profiler.dump()))
             }
             else -> {
@@ -116,17 +106,13 @@ class MainActivity : AppCompatActivity() {
                 val dur = profiler.add("useful work") { res = solver.work() }
 
                 //            if(res.id[res.id.length-1] == '1'){
-//                if (res.id.slice(0..2).equals("[0,")) {
-                logAppend(
-                    "${res.cmd} ${res.id} done: "
-                            + dur + "ms"
-                )
-//                }
+                if (res.id.slice(0..2) == "[0,") {
+                    logAppend(
+                        "${res.cmd} ${res.id} done: "
+                                + dur + "ms"
+                    )
+                }
                 kn.sendTCP(res)
-                //            val res = worker.result
-
-                //            val sendMsg = res.task2json()
-                //            logAppend("sending msg: $sendMsg")
             }
         }
     }

@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.urop.common.Profiler.profiler;
 import static com.urop.common.SerializerKt.toIArr;
 import static com.urop.server.Utils.logAppend;
 
@@ -44,7 +43,7 @@ public class Dispatcher implements Runnable {
                     Connection avail = availNodes.remove(0);
 
                     Task t = pendingTasks.remove(0);
-                    profiler.add("net send", () -> avail.sendTCP(t));
+                    avail.sendTCP(t);
 //                    logAppend("sent a msg");
 //            logAppend("send: " + task2json(t));
                     busyNodes.add(avail);

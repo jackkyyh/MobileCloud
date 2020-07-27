@@ -3,9 +3,10 @@ package com.urop.common;
 public class Task {
     static int globalID = 0;
     final public String cmd;
-    final public String id; // id, unmodifiable
+    final public String id;
     public int[] iArrData;
     public byte[] bArrData;
+    public String strData;
     public int waitCount; // working time
 
 
@@ -17,8 +18,6 @@ public class Task {
     public Task(String cmd) {
         this(cmd, Integer.toString(globalID++));
     }
-
-    public String strData; // explain data
 
     public Task() {
         this("NOP");

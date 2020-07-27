@@ -41,7 +41,7 @@ public class Server {
 //        miniTest();
 
         TaskController cter = new SortController(1000000, 5000);
-        cter.setWAIT_FOR(1);
+        cter.setWAIT_FOR(3);
         server.run(cter);
     }
 

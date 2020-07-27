@@ -5,7 +5,6 @@ import com.urop.common.Task
 
 
 val qsort: Task.() -> Unit = {
-//    iArrData = iArrData.sortedArray()
     iArrData.sort()
 }
 
