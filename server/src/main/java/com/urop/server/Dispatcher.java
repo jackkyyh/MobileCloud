@@ -3,7 +3,6 @@ package com.urop.server;
 import com.esotericsoftware.kryonet.Connection;
 import com.urop.common.Task;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.urop.common.Profiler.profiler;
-import static com.urop.common.SerializerKt.toIArr;
 import static com.urop.server.Utils.logAppend;
+
+//import static com.urop.common.SerializerKt.toIArr;
 
 public class Dispatcher implements Runnable {
 
@@ -44,9 +43,8 @@ public class Dispatcher implements Runnable {
                     Connection avail = availNodes.remove(0);
 
                     Task t = pendingTasks.remove(0);
-                    profiler.add("net send", () -> avail.sendTCP(t));
-//                    logAppend("sent a msg");
-//            logAppend("send: " + task2json(t));
+                    avail.sendTCP(t);
+//                    logAppend("sent a task");
                     busyNodes.add(avail);
                     executingTasks.put(avail, t);
 //                    logAppend(t.meta + " added to executing");
@@ -95,7 +93,7 @@ public class Dispatcher implements Runnable {
         Task rem = executingTasks.remove(conn);
         if (rem == null) {
             logAppend("executingTasks removal failed!");
-            logAppend("Task: " + t.cmd + Arrays.toString(toIArr(t.id)));
+            logAppend("Task: " + t.getClass().getName() + " " + t.id);
             return false;
         } else {
             assert rem.id.equals(t.id);

@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class Profiler {
-    public final static Profiler profiler = new Profiler();
+public class Profile extends Task {
+    public final static Profile profile = new Profile();
     Map<String, Long> timeStats = new HashMap<>();
 
-    private Profiler() {
+    public Profile() {
+        super();
     }
+
+//    public Profile emptyProfile()
 
     public long add(String cat, long time) {
 //        timeStats.compute(cat, (k, v)->{
@@ -40,7 +43,8 @@ public class Profiler {
         return r;
     }
 
-    public String dump() {
+    @Override
+    public String toString() {
         if (timeStats.isEmpty()) {
             return "empty!";
         }

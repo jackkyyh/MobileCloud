@@ -2,6 +2,8 @@ package com.urop.server;
 
 
 import com.esotericsoftware.kryonet.Connection;
+import com.urop.common.Message;
+import com.urop.common.Profile;
 import com.urop.common.Task;
 
 import java.io.IOException;
@@ -41,7 +43,7 @@ public class Server {
 //        miniTest();
 
         TaskController cter = new SortController(1000000, 5000);
-        cter.setWAIT_FOR(1);
+        cter.setWaitFor(1);
         server.run(cter);
     }
 
@@ -63,15 +65,17 @@ public class Server {
 
 
     public void newNode(Connection conn) {
-        conn.sendTCP(Task.Message("Greetings from the server!"));
+        conn.sendTCP(new Message("Greetings from the server!"));
 
         dispatcher.addAvailNode(conn);
     }
 
 
     public void taskParser(Connection conn, Task t) {
-        if (t.cmd.equals("Message")) {
-            logAppend(getAddress(conn) + ": " + t.id);
+        if (t instanceof Message) {
+            logAppend(getAddress(conn) + ": " + ((Message) t).getMsg());
+        } else if (t instanceof Profile) {
+            logAppend(getAddress(conn) + " profile: " + t.toString());
         } else {
             taskController.commitTask(conn, t);
         }

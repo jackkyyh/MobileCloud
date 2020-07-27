@@ -1,6 +1,9 @@
 package com.urop.server;
 
 import com.esotericsoftware.kryonet.Connection;
+import com.urop.common.MSortTask;
+import com.urop.common.QSortTask;
+import com.urop.common.SortTask;
 import com.urop.common.Task;
 
 import java.util.Arrays;
@@ -10,9 +13,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 
-import static com.urop.common.SerializerKt.toIArr;
-import static com.urop.common.SerializerKt.toJson;
 import static com.urop.server.Utils.logAppend;
+
+//import static com.urop.common.SerializerKt.toIArr;
+//import static com.urop.common.SerializerKt.toJson;
 
 
 public class SortController extends TaskController {
@@ -21,7 +25,7 @@ public class SortController extends TaskController {
     final int ARR_LENGTH;
     public int[] arr;
 
-    volatile Map<String, Collection<Task>> blockedTasks;
+    volatile Map<String, Collection<SortTask>> blockedTasks;
 
 
     public SortController() {
@@ -49,7 +53,7 @@ public class SortController extends TaskController {
 
     void sort(int start, int end) {
         if (end - start <= MIN_SEG_LENGTH) {
-            Task t = createEmptyTask("QSRT", start, end);
+            SortTask t = new QSortTask(start, end);
             addBlockedTask(null, t);
             return;
         }
@@ -60,16 +64,16 @@ public class SortController extends TaskController {
 
 
 //        while(!dispatcher.isTaskFinished(dep1) || !dispatcher.isTaskFinished(dep2)){}
-        Task t = createEmptyTask("MSRT", start, end);
+        SortTask t = new MSortTask(start, end);
 //        String dep1 = createHeader()
-        String dep1 = encodeID(start, middle);
-        String dep2 = encodeID(middle, end);
+        String dep1 = SortTask.Companion.encodeID(start, middle);
+        String dep2 = SortTask.Companion.encodeID(middle, end);
         addBlockedTask(new String[]{dep1, dep2}, t);
 //        addBlockedTask(dep2, t);
     }
 
 
-    synchronized void addBlockedTask(String[] depend, Task t) {
+    synchronized void addBlockedTask(String[] depend, SortTask t) {
         if (depend == null) {
             fillTaskData(t);
             dispatcher.addPendingTask(t);
@@ -78,7 +82,7 @@ public class SortController extends TaskController {
 
         for (String dep : depend) {
             if (!dispatcher.isTaskFinished(dep)) {
-                Collection<Task> set = blockedTasks.get(dep);
+                Collection<SortTask> set = blockedTasks.get(dep);
                 if (set == null) {
                     set = new HashSet<>();
                     set.add(t);
@@ -96,43 +100,28 @@ public class SortController extends TaskController {
             dispatcher.addPendingTask(t);
         }
 
-//        logAppend("[" + t.meta + "] depends on [" + depend + "]");
     }
 
-
-    Task createEmptyTask(String header, int start, int end) {
-        return new Task(header, encodeID(start, end));
-    }
-
-    String encodeID(int start, int end) {
-        return toJson(new int[]{start, end});
-    }
-
-    int[] decodeID(String id) {
-//        String[] strArr = meta.split(",");
-        return toIArr(id);
-    }
 
     @Override
-    public synchronized void commitTask(Connection conn, Task t) {
-
+    public synchronized void commitTask(Connection conn, Task tt) {
+        SortTask t = (SortTask) tt;
 //        logAppend("receive: " + t.id);
-        int[] res;
+
 //        profiler.add("deserialization", ()->{res = toIArr(t.data);});
 //        logAppend("parse done");
 //        res = profiler.add("deserial(IntArr)", SerializerKt::toIArr, t.iArrData);
-        res = t.iArrData;
-        int index = decodeID(t.id)[0];
-//        logAppend("index = "+index);
+        int[] res = t.getArr();
+        int index = t.start;
         int i = 0;
         while (i < res.length) {
             arr[index++] = res[i++];
         }
 //        logAppend("new arr: " + toJson(arr));
         if (dispatcher.commitTask(conn, t)) {
-            Collection<Task> set = blockedTasks.get(t.id);
+            Collection<SortTask> set = blockedTasks.get(t.id);
             if (set != null) {
-                for (Task task : set) {
+                for (SortTask task : set) {
                     task.waitCount--;
 //                    logAppend("[" + task.meta + "] block -1");
                     if (task.waitCount == 0) {
@@ -154,9 +143,9 @@ public class SortController extends TaskController {
 //        dispatcher.loopDispatch();
     }
 
-    void fillTaskData(Task t) {
+    void fillTaskData(SortTask t) {
 
-        int[] index = decodeID(t.id);
+//        in;
 
 //        int[] subarr = profiler.add("arrayCopy",
 //                (ind)->{
@@ -166,7 +155,7 @@ public class SortController extends TaskController {
 //        profiler.add("serial(IntArr)", ()->{
 //            t.iArrData = SerializerKt.toBArr(subarr);
 //        });
-        t.iArrData = Arrays.copyOfRange(arr, index[0], index[1]);
+        t.setArr(Arrays.copyOfRange(arr, t.start, t.end));
     }
 
 

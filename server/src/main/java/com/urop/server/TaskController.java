@@ -1,20 +1,21 @@
 package com.urop.server;
 
 import com.esotericsoftware.kryonet.Connection;
+import com.urop.common.Profile;
 import com.urop.common.Task;
 
-import static com.urop.common.Profiler.profiler;
+import static com.urop.common.Profile.profile;
 import static com.urop.server.Server.server;
 import static com.urop.server.Utils.logAppend;
 
 public abstract class TaskController implements Runnable {
 
     final Dispatcher dispatcher;
-    int WAIT_FOR;
+    int waitFor;
     boolean doProfile;
 
     public TaskController() {
-        WAIT_FOR = 2;
+        waitFor = 2;
 //        profile = false;
         dispatcher = server.getDispatcher();
     }
@@ -23,11 +24,11 @@ public abstract class TaskController implements Runnable {
     @Override
     public void run() {
 
-        dispatcher.blockUntilSomeNodeConnect(WAIT_FOR);
+        dispatcher.blockUntilSomeNodeConnect(waitFor);
 
         logAppend("Starts...");
 
-        long time = profiler.add("total", () -> {
+        long time = profile.add("total", () -> {
             reallyRun();
             blockUntilAllTasksFinish();
         });
@@ -43,8 +44,8 @@ public abstract class TaskController implements Runnable {
 //        timespent.forEach((conn, t) ->
 //                logAppend(getAddress(conn) + " spent " + t + "ms."));
 
-        logAppend("Server profile:" + profiler.dump());
-        dispatcher.broadcast(new Task("Profile"));
+        logAppend("Server profile:" + profile);
+        dispatcher.broadcast(new Profile());
     }
 
     void blockUntilAllTasksFinish() {
@@ -59,8 +60,8 @@ public abstract class TaskController implements Runnable {
         dispatcher.commitTask(conn, t);
     }
 
-    public void setWAIT_FOR(int W) {
-        WAIT_FOR = W;
+    public void setWaitFor(int w) {
+        waitFor = w;
     }
 
     void safeWait() {

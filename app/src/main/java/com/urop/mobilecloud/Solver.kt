@@ -1,10 +1,9 @@
 package com.urop.mobilecloud
 
-import com.urop.common.Task
+import com.urop.common.*
 
 
 class Solver {
-//    var data: IntArray
 
     private val taskBuffer: MutableList<Task> = mutableListOf()
 
@@ -20,16 +19,14 @@ class Solver {
 
     fun work(task: Task): Task {
 
-        val tt = when (task.cmd) {
-            "QSRT" -> task.apply(qsort)
-            "MSRT" -> msort(task)
-            "QUEEN" -> queens(task)
-            "NOP" -> task
-            else -> {
-                task.strData = "CMD not understood!"
-                return task
-            }
+        val tt = when (task) {
+            is QSortTask -> task.apply { qsort }
+            is MSortTask -> msort(task)
+            is NQueenTask -> task.apply { nqueens }
+            is NOPTask -> task
+            else -> Message("CMD not understood!")
         }
+
         Thread.sleep(10)
         return tt
     }

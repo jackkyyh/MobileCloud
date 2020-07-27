@@ -1,10 +1,12 @@
 package com.urop.mobilecloud
 
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.urop.common.Profiler.profiler
+import com.urop.common.Message
+import com.urop.common.Profile
+import com.urop.common.Profile.profile
 import com.urop.common.Task
-import com.urop.common.toTask
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         if (isChecked) {
             Thread {
                 kn.connect(5000, "192.168.10.143", 9544, 9566)
-                kn.sendTCP(Task.Message("Hi, this is ${android.os.Build.MODEL}"))
+                kn.sendTCP(Message("Hi, this is ${Build.MODEL}"))
 
             }.start()
 
@@ -62,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun clearProfile() {
-        profiler.clear()
+        profile.clear()
         logAppend("Profile cleared")
     }
 
@@ -92,41 +94,30 @@ class MainActivity : AppCompatActivity() {
         switchOffManually = true
     }
 
-    fun msgParser(msg: ByteArray) {
-//        logAppend("Get a msg")
-        var t = Task()
-        profiler.add("deserial") { t = msg.toTask() }
-//        logAppend("byte to task took $dur")
-        taskParser(t)
-//        logAppend("Duration: ${duration}")
-    }
 
     fun taskParser(task: Task) {
-        when (task.cmd) {
-            "Message" -> {
-                logAppend("Msg: ${task.id}")
+        when (task) {
+            is Message -> {
+                logAppend("Msg: ${task.msg}")
             }
-            "Profile" -> {
-//                logAppend("send ${profiler.dump()}")
-                kn.sendTCP(Task.Message(profiler.dump()))
+            is Profile -> {
+                kn.sendTCP(profile)
             }
             else -> {
+//                logAppend("received" + task.id)
                 solver.addTask(task)
                 var res = Task()
-                val dur = profiler.add("useful work") { res = solver.work() }
+                val dur = profile.add("useful work") { res = solver.work() }
 
                 //            if(res.id[res.id.length-1] == '1'){
-//                if (res.id.slice(0..2).equals("[0,")) {
-                logAppend(
-                    "${res.cmd} ${res.id} done: "
-                            + dur + "ms"
-                )
-//                }
+                if (res.id.slice(0..2) == "[0,") {
+                    val name = res.javaClass.name.split(".").last()
+                    logAppend(
+                        "$name ${res.id} done: "
+                                + dur + "ms"
+                    )
+                }
                 kn.sendTCP(res)
-                //            val res = worker.result
-
-                //            val sendMsg = res.task2json()
-                //            logAppend("sending msg: $sendMsg")
             }
         }
     }

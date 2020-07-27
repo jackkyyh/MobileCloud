@@ -1,12 +1,14 @@
 package com.urop.server;
 
 import com.esotericsoftware.kryonet.Connection;
+import com.urop.common.NQueenTask;
 import com.urop.common.Task;
 
-import static com.urop.common.SerializerKt.toIArr;
-import static com.urop.common.SerializerKt.toIntArr2d;
-import static com.urop.common.SerializerKt.toJson;
 import static com.urop.server.Utils.logAppend;
+
+//import static com.urop.common.SerializerKt.toIArr;
+//import static com.urop.common.SerializerKt.toIntArr2d;
+//import static com.urop.common.SerializerKt.toJson;
 
 public class QueenController extends TaskController {
 
@@ -26,10 +28,10 @@ public class QueenController extends TaskController {
 
     @Override
     void reallyRun() {
-        int[] arr = new int[N];
-        Task t = new Task("QUEEN");
-        t.strData = toJson(new int[]{N, step});
-        t.iArrData = arr;
+//        int[] arr = new int[N];
+        NQueenTask t = new NQueenTask(N, step);
+//        t. new int[]{N, step});
+//        t.iArrData = arr;
         dispatcher.addPendingTask(t);
     }
 
@@ -40,21 +42,19 @@ public class QueenController extends TaskController {
     }
 
     @Override
-    public void commitTask(Connection conn, Task t) {
-
+    public void commitTask(Connection conn, Task tt) {
+        NQueenTask t = (NQueenTask) tt;
 //        logAppend("recieved");
-        int[][] res = toIntArr2d(t.bArrData);
+        int[][] res = t.solution;
 //        logAppend("parsed");
 
 
-        if (toIArr(t.strData)[0] == 0 && res.length > 0) {
+        if (t.remaining == 0 && res.length > 0) {
 //            logAppend("find " + res.length + " solution");
             numOfSolution += res.length;
         } else {
             for (int[] arr : res) {
-                Task newT = new Task("QUEEN");
-                newT.strData = t.strData;
-                newT.iArrData = arr;
+                NQueenTask newT = new NQueenTask(arr, t.remaining, t.step);
                 dispatcher.addPendingTask(newT);
 //                logAppend("new task created");
             }
