@@ -3,6 +3,7 @@ package com.urop.common
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
+import com.esotericsoftware.kryonet.EndPoint
 import com.google.gson.Gson
 import java.nio.ByteBuffer
 
@@ -112,6 +113,11 @@ object MyKryo {
 }
 
 const val BUFFER_SIZE = 50 * 1024 * 1024
+
+fun register(ep: EndPoint) {
+    val kryo = ep.kryo
+    register(kryo)
+}
 
 fun register(kryo: Kryo) {
     kryo.register(Task::class.java)

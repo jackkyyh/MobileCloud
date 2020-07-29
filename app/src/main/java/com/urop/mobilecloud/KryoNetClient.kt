@@ -12,7 +12,7 @@ import java.net.InetAddress
 class KryoNetClient(private val mainActivity: MainActivity) : Client(BUFFER_SIZE, BUFFER_SIZE) {
     init {
         addListener(MyListener(this))
-        register(kryo)
+        register(this)
     }
 
     fun taskReceived(t: Task) {
