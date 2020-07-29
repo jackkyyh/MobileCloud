@@ -34,11 +34,8 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
-configurations.all {
-    resolutionStrategy.capabilitiesResolution.withCapability('org.ow2.asm:asm') {
-        selectHighestVersion()
-    }
-}
+
+
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
@@ -50,7 +47,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    implementation 'com.squareup.okhttp3:okhttp:4.8.0'
+
+    implementation project(path: ':common')
     implementation("kryonet:kryonet:2.21"){
         exclude group: 'com.esotericsoftware.minlog'
         exclude module: 'minlog'
@@ -58,9 +56,6 @@ dependencies {
         exclude module: 'reflectasm'
     }
 
-    implementation ('com.esotericsoftware:kryo:5.0.0-RC6')
-
-    implementation project(path: ':common')
 //    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0"
 //    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0"
 }

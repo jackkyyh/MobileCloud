@@ -12,7 +12,7 @@ public class KryoNetServer extends com.esotericsoftware.kryonet.Server {
 
     KryoNetServer() {
         super(BUFFER_SIZE, BUFFER_SIZE);
-        register(getKryo());
+        register(this);
 
         addListener(new Listener() {
             @Override
