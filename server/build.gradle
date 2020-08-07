@@ -11,7 +11,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation "kryonet:kryonet:2.21"
-    implementation 'com.esotericsoftware:kryo:5.0.0-RC7'
 
     implementation project(path: ':common')
 }

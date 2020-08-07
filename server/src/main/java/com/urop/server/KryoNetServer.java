@@ -33,10 +33,6 @@ public class KryoNetServer extends com.esotericsoftware.kryonet.Server {
                 server.nodeDisconnect(connection);
             }
 
-//            @Override
-//            public void idle(Connection connection) {
-//                logAppend("idle...");
-//            }
         });
     }
 }

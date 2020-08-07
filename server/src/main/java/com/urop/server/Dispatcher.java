@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 
 import static com.urop.server.Utils.logAppend;
 
-//import static com.urop.common.SerializerKt.toIArr;
 
 public class Dispatcher implements Runnable {
 
@@ -22,8 +21,7 @@ public class Dispatcher implements Runnable {
     volatile List<Task> pendingTasks;
     volatile Map<Connection, Task> executingTasks;
     volatile Collection<String> finishedTasks;
-
-    volatile Map<Connection, Integer> realWorkingTime;
+//    volatile Map<Connection, Integer> realWorkingTime;
 
     Dispatcher() {
         availNodes = new LinkedList<>();
@@ -31,12 +29,11 @@ public class Dispatcher implements Runnable {
         pendingTasks = new LinkedList<>();
         executingTasks = new HashMap<>();
         finishedTasks = new HashSet<>();
-        realWorkingTime = new HashMap<>();
-
-//        server = s;
+//        realWorkingTime = new HashMap<>();
     }
 
     public void dispatch() {
+        //noinspection InfiniteLoopStatement
         while (true) {
             synchronized (this) {
                 while (!availNodes.isEmpty() && !pendingTasks.isEmpty()) {
@@ -44,7 +41,7 @@ public class Dispatcher implements Runnable {
 
                     Task t = pendingTasks.remove(0);
                     avail.sendTCP(t);
-//                    logAppend("sent a task");
+//                    logAppend(t.id + " sent");
                     busyNodes.add(avail);
                     executingTasks.put(avail, t);
 //                    logAppend(t.meta + " added to executing");
@@ -85,11 +82,6 @@ public class Dispatcher implements Runnable {
         }
         availNodes.add(conn);
 
-//        try{
-//            Thread.sleep(10);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
         Task rem = executingTasks.remove(conn);
         if (rem == null) {
             logAppend("executingTasks removal failed!");
@@ -113,9 +105,7 @@ public class Dispatcher implements Runnable {
 
     public synchronized void addAvailNode(Connection node) {
         availNodes.add(node);
-//        synchronized (this){
         this.notifyAll();
-//        }
     }
 
 
@@ -134,7 +124,7 @@ public class Dispatcher implements Runnable {
     }
 
 
-    public int numOfNode() {
+    public synchronized int numOfNode() {
         return availNodes.size() + busyNodes.size();
     }
 

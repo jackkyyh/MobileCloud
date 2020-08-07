@@ -1,10 +1,17 @@
 package com.urop.common
 
-import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryonet.EndPoint
 
 const val BUFFER_SIZE = 50 * 1024 * 1024
 
-fun register(kryo: Kryo) {
+//val gson = Gson()
+
+fun IntArray.toJson(): String {
+    return "[" + this.joinToString() + "]"
+}
+
+fun register(ep: EndPoint) {
+    val kryo = ep.kryo
     kryo.register(Task::class.java)
     kryo.register(Message::class.java)
     kryo.register(QSortTask::class.java)
@@ -19,6 +26,4 @@ fun register(kryo: Kryo) {
 //    kryo.register(String::class.java)
     kryo.register(Array<IntArray>::class.java)
     kryo.references = false
-//        kryo.register(BooleanArray::class.java)
-//        kryo.instantiatorStrategy = StdInstantiatorStrategy()
 }

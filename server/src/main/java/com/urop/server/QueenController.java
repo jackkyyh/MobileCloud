@@ -6,10 +6,6 @@ import com.urop.common.Task;
 
 import static com.urop.server.Utils.logAppend;
 
-//import static com.urop.common.SerializerKt.toIArr;
-//import static com.urop.common.SerializerKt.toIntArr2d;
-//import static com.urop.common.SerializerKt.toJson;
-
 public class QueenController extends TaskController {
 
     int numOfSolution;

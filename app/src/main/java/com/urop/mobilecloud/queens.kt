@@ -1,11 +1,14 @@
 package com.urop.mobilecloud
 
-import com.urop.common.Chessboard
+
+//import com.urop.common.Chessboard
 import com.urop.common.NQueenTask
 import java.lang.Integer.max
 
 
+typealias Chessboard = IntArray
 // meta: {remaining, step}
+
 
 val nqueens: NQueenTask.() -> Unit = {
     solution = recQueens(

@@ -14,13 +14,14 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private var logString: String = ""
+    private var logString = ""
+    private val serverAdd = "192.168.1.110"
 
     //    private val webSocket = WebSocketClient(this)
     private val kn = KryoNetClient(this)
     private val solver = Solver()
 
-    var switchOffManually = false
+    private var switchOffManually = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         clearProfileBotton.setOnClickListener { clearProfile() }
 
         netSwitcher.performClick()
+
 //        miniTest()
     }
 
@@ -44,7 +46,7 @@ class MainActivity : AppCompatActivity() {
     private fun switchChecked(isChecked: Boolean) {
         if (isChecked) {
             Thread {
-                kn.connect(5000, "192.168.10.143", 9544, 9566)
+                kn.connect(5000, serverAdd, 9544, 9566)
                 kn.sendTCP(Message("Hi, this is ${Build.MODEL}"))
 
             }.start()
@@ -63,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         logText.text = ""
     }
 
-    fun clearProfile() {
+    private fun clearProfile() {
         profile.clear()
         logAppend("Profile cleared")
     }
@@ -96,6 +98,7 @@ class MainActivity : AppCompatActivity() {
 
 
     fun taskParser(task: Task) {
+//        logAppend(task.id + " received ")
         when (task) {
             is Message -> {
                 logAppend("Msg: ${task.msg}")
@@ -111,7 +114,7 @@ class MainActivity : AppCompatActivity() {
 
                 //            if(res.id[res.id.length-1] == '1'){
                 if (res.id.slice(0..2) == "[0,") {
-                    val name = res.javaClass.name.split(".").last()
+                    val name = res.javaClass.simpleName
                     logAppend(
                         "$name ${res.id} done: "
                                 + dur + "ms"

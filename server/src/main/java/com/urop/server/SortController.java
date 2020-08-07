@@ -28,10 +28,6 @@ public class SortController extends TaskController {
     volatile Map<String, Collection<SortTask>> blockedTasks;
 
 
-    public SortController() {
-        this(100000, 5000);
-    }
-
     public SortController(int arrLength, int segLength) {
 
         ARR_LENGTH = arrLength;
@@ -106,12 +102,10 @@ public class SortController extends TaskController {
     @Override
     public synchronized void commitTask(Connection conn, Task tt) {
         SortTask t = (SortTask) tt;
+//        logAppend("receive: " + t.id + ": " + toJson(t.arr));
 //        logAppend("receive: " + t.id);
 
-//        profiler.add("deserialization", ()->{res = toIArr(t.data);});
-//        logAppend("parse done");
-//        res = profiler.add("deserial(IntArr)", SerializerKt::toIArr, t.iArrData);
-        int[] res = t.getArr();
+        int[] res = t.arr;
         int index = t.start;
         int i = 0;
         while (i < res.length) {
@@ -145,17 +139,7 @@ public class SortController extends TaskController {
 
     void fillTaskData(SortTask t) {
 
-//        in;
-
-//        int[] subarr = profiler.add("arrayCopy",
-//                (ind)->{
-//            return Arrays.copyOfRange(arr, ind[0], ind[1]);}, index);
-
-//        t.data = profiler.add("serialization", UtilsKt::toBArr, subarr);
-//        profiler.add("serial(IntArr)", ()->{
-//            t.iArrData = SerializerKt.toBArr(subarr);
-//        });
-        t.setArr(Arrays.copyOfRange(arr, t.start, t.end));
+        t.arr = Arrays.copyOfRange(arr, t.start, t.end);
     }
 
 

@@ -13,17 +13,11 @@ import static com.urop.server.Utils.logAppend;
 
 public class Server {
 
-
-    public final static Server server = new Server();
     Dispatcher dispatcher;
     TaskController taskController;
-    //    WebSocketServer webSocketServer;
     KryoNetServer kryoNetServer;
 
     private Server() {
-        int port = 9544;
-//        webSocketServer = new WebSocketServer(port, this);
-//        webSocketServer.start();
         kryoNetServer = new KryoNetServer();
         kryoNetServer.start();
         try {
@@ -37,30 +31,20 @@ public class Server {
 
     }
 
+    public final static Server server = new Server();
+
     public static void main(String[] args) {
-//        TaskController cter = new NopController();
-//        TaskController sorter = new SortController();
+//        TaskController ctrler = new NopController();
 //        miniTest();
 
-        TaskController cter = new SortController(1000000, 5000);
-        cter.setWaitFor(1);
-        server.run(cter);
+        TaskController ctrler = new SortController(1000000, 5000);
+        ctrler.setWaitFor(1);
+        server.run(ctrler);
     }
 
     public void nodeDisconnect(Connection conn) {
+        logAppend(" disconnected.");
         dispatcher.removeNode(conn);
-    }
-
-    public void run(TaskController r) {
-
-        taskController = r;
-
-//        Thread t1 = new Thread()
-        new Thread(taskController, "controller").start();
-        new Thread(dispatcher, "dispatcher").start();
-//        tDispatch;
-//        tSort.start();
-
     }
 
 
@@ -79,6 +63,14 @@ public class Server {
         } else {
             taskController.commitTask(conn, t);
         }
+    }
+
+    public void run(TaskController r) {
+
+        taskController = r;
+
+        new Thread(taskController, "Controller").start();
+        new Thread(dispatcher, "Dispatcher").start();
     }
 
     public Dispatcher getDispatcher() {

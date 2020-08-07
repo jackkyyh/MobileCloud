@@ -1,7 +1,7 @@
 package com.urop.common
 
 
-open class Task(@JvmField val id: String = (globalID++).toString()) {
+open class Task(@JvmField var id: String = (globalID++).toString()) {
 
     companion object {
         var globalID = 0
@@ -22,13 +22,12 @@ open class SortTask(@JvmField val start: Int, @JvmField val end: Int) : Task(enc
 }
 
 
-class NOPTask : Task()
-
 class QSortTask(start: Int = 0, end: Int = 0) : SortTask(start, end)
 class MSortTask(start: Int = 0, end: Int = 0) : SortTask(start, end)
 
+class NOPTask : Task()
+
 class Message(val msg: String = "") : Task()
-//class Profile(val profile: HashMap<String, Int>): Task(){}
 
 typealias Chessboard = IntArray
 

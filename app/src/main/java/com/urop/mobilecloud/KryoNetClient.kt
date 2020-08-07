@@ -11,30 +11,28 @@ import java.net.InetAddress
 
 class KryoNetClient(private val mainActivity: MainActivity) : Client(BUFFER_SIZE, BUFFER_SIZE) {
     init {
-        addListener(MyListener(this))
+        addListener(MyListener(mainActivity))
         register(this)
     }
 
-    fun taskReceived(t: Task) {
-        mainActivity.taskParser(t)
-    }
-
     override fun connect(p0: Int, p1: InetAddress?, p2: Int, p3: Int) {
-
         try {
             super.connect(p0, p1, p2, p3)
         } catch (e: IOException) {
             mainActivity.logAppend(e.message!!)
             mainActivity.retryNetSwitch()
         }
-
     }
 
-    internal class MyListener(private val kn: KryoNetClient) : Listener() {
+    internal class MyListener(private val mainActivity: MainActivity) : Listener() {
         override fun received(p0: Connection?, p1: Any?) {
             if (p1 is Task) {
-                kn.taskReceived(p1)
+                mainActivity.taskParser(p1)
             }
+        }
+
+        override fun disconnected(p0: Connection?) {
+            mainActivity.logAppend("Disconnected.")
         }
 
     }

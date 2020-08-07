@@ -19,16 +19,14 @@ class Solver {
 
     fun work(task: Task): Task {
 
-        val tt = when (task) {
-            is QSortTask -> task.apply { qsort }
-            is MSortTask -> msort(task)
-            is NQueenTask -> task.apply { nqueens }
+        Thread.sleep(10)
+        return when (task) {
+            is QSortTask -> task.apply(qsort)
+            is MSortTask -> task.apply(msort)
+            is NQueenTask -> task.apply(nqueens)
             is NOPTask -> task
             else -> Message("CMD not understood!")
         }
-
-        Thread.sleep(10)
-        return tt
     }
 
 }

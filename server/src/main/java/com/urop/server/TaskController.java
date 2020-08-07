@@ -12,11 +12,11 @@ public abstract class TaskController implements Runnable {
 
     final Dispatcher dispatcher;
     int waitFor;
-    boolean doProfile;
+    boolean printProfile;
 
     public TaskController() {
         waitFor = 2;
-//        profile = false;
+        printProfile = true;
         dispatcher = server.getDispatcher();
     }
 
@@ -40,12 +40,10 @@ public abstract class TaskController implements Runnable {
             logAppend("Check failed!");
         }
 
-//        Map<WebSocket, Integer> timespent = dispatcher.getRealWorkingTime();
-//        timespent.forEach((conn, t) ->
-//                logAppend(getAddress(conn) + " spent " + t + "ms."));
-
-        logAppend("Server profile:" + profile);
-        dispatcher.broadcast(new Profile());
+        if (printProfile) {
+            logAppend("Server profile:" + profile);
+            dispatcher.broadcast(new Profile());
+        }
     }
 
     void blockUntilAllTasksFinish() {
@@ -64,6 +62,10 @@ public abstract class TaskController implements Runnable {
         waitFor = w;
     }
 
+    public void setPrintProfile(boolean p) {
+        printProfile = p;
+    }
+
     void safeWait() {
         try {
             this.wait();
@@ -71,5 +73,4 @@ public abstract class TaskController implements Runnable {
             e.printStackTrace();
         }
     }
-//    public void blockUntilFinish
 }
