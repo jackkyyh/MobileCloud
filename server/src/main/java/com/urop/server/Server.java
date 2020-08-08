@@ -1,42 +1,42 @@
 package com.urop.server;
 
 
-import com.esotericsoftware.kryonet.Connection;
+//import com.esotericsoftware.kryonet.Connection;
+
+import com.urop.common.Connection;
 import com.urop.common.Message;
 import com.urop.common.Profile;
 import com.urop.common.Task;
+import com.urop.server.taskController.SortController;
+import com.urop.server.taskController.TaskController;
 
-import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
-import static com.urop.server.Utils.getAddress;
-import static com.urop.server.Utils.logAppend;
 
 public class Server {
 
     Dispatcher dispatcher;
     TaskController taskController;
-    KryoNetServer kryoNetServer;
+    public static Server server;
+    ServerEndPoint ep;
 
-    private Server() {
-        kryoNetServer = new KryoNetServer();
-        kryoNetServer.start();
-        try {
-            kryoNetServer.bind(9544, 9566);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Server started on port: " + 9544);
+    private Server(boolean LOCALMODE) {
+        logAppend("local: " + LOCALMODE);
+        ep = LOCALMODE ? new LocalServerEndPoint() : new KryoNetServerEndPoint();
 
         dispatcher = new Dispatcher();
 
     }
 
-    public final static Server server = new Server();
-
     public static void main(String[] args) {
 //        TaskController ctrler = new NopController();
 //        miniTest();
 
+        logAppend("This is the server!");
+
+        server = new Server(args.length > 0 && Boolean.parseBoolean(args[0]));
         TaskController ctrler = new SortController(1000000, 5000);
         ctrler.setWaitFor(1);
         server.run(ctrler);
@@ -47,23 +47,18 @@ public class Server {
         dispatcher.removeNode(conn);
     }
 
+    public static void logAppend(String text) {
+
+        String curTime = new SimpleDateFormat("[HH:mm:ss:SSS] ", Locale.getDefault()).format(new Date());
+        System.out.println(curTime + text);
+    }
 
     public void newNode(Connection conn) {
-        conn.sendTCP(new Message("Greetings from the server!"));
+        conn.send(new Message("Greetings from the server!"));
 
         dispatcher.addAvailNode(conn);
     }
 
-
-    public void taskParser(Connection conn, Task t) {
-        if (t instanceof Message) {
-            logAppend(getAddress(conn) + ": " + ((Message) t).getMsg());
-        } else if (t instanceof Profile) {
-            logAppend(getAddress(conn) + " profile: " + t.toString());
-        } else {
-            taskController.commitTask(conn, t);
-        }
-    }
 
     public void run(TaskController r) {
 
@@ -75,6 +70,23 @@ public class Server {
 
     public Dispatcher getDispatcher() {
         return dispatcher;
+    }
+
+    public void taskParser(Connection conn, Task t) {
+//        logAppend("task parser receives task " + t.id);
+        if (t instanceof Message) {
+            logAppend(conn.getName() + ": " + ((Message) t).getMsg());
+        } else if (t instanceof Profile) {
+            logAppend(conn.getName() + " profile: " + t.toString());
+        } else {
+//            logAppend("go to task controller commit");
+            taskController.commitTask(conn, t);
+        }
+//        logAppend("task parser done");
+    }
+
+    public ServerEndPoint getEp() {
+        return ep;
     }
 
 }

@@ -1,6 +1,8 @@
-package com.urop.server;
+package com.urop.server.taskController;
 
-import com.esotericsoftware.kryonet.Connection;
+//import com.esotericsoftware.kryonet.Connection;
+
+import com.urop.common.Connection;
 import com.urop.common.Task;
 
 public class NopController extends TaskController {

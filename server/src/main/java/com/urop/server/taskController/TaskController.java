@@ -1,12 +1,15 @@
-package com.urop.server;
+package com.urop.server.taskController;
 
-import com.esotericsoftware.kryonet.Connection;
+//import com.esotericsoftware.kryonet.Connection;
+
+import com.urop.common.Connection;
 import com.urop.common.Profile;
 import com.urop.common.Task;
+import com.urop.server.Dispatcher;
 
 import static com.urop.common.Profile.profile;
+import static com.urop.server.Server.logAppend;
 import static com.urop.server.Server.server;
-import static com.urop.server.Utils.logAppend;
 
 public abstract class TaskController implements Runnable {
 
@@ -54,7 +57,7 @@ public abstract class TaskController implements Runnable {
 
     abstract boolean checkResult();
 
-    void commitTask(Connection conn, Task t) {
+    public void commitTask(Connection conn, Task t) {
         dispatcher.commitTask(conn, t);
     }
 

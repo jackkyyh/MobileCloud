@@ -1,6 +1,8 @@
-package com.urop.server;
+package com.urop.server.taskController;
 
-import com.esotericsoftware.kryonet.Connection;
+//import com.esotericsoftware.kryonet.Connection;
+
+import com.urop.common.Connection;
 import com.urop.common.MSortTask;
 import com.urop.common.QSortTask;
 import com.urop.common.SortTask;
@@ -13,7 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 
-import static com.urop.server.Utils.logAppend;
+import static com.urop.server.Server.logAppend;
 
 //import static com.urop.common.SerializerKt.toIArr;
 //import static com.urop.common.SerializerKt.toJson;

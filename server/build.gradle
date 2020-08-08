@@ -10,10 +10,18 @@ mainClassName = 'com.urop.server.Server'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation "kryonet:kryonet:2.21"
+    implementation("kryonet:kryonet:2.21"){
+        exclude group: 'com.esotericsoftware.minlog'
+        exclude module: 'minlog'
+        exclude group: 'com.esotericsoftware.reflectasm'
+        exclude module: 'reflectasm'
+    }
 
     implementation project(path: ':common')
 }
+
+targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 jar {
     manifest {

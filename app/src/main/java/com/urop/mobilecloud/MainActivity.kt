@@ -7,19 +7,22 @@ import com.urop.common.Message
 import com.urop.common.Profile
 import com.urop.common.Profile.profile
 import com.urop.common.Task
+import com.urop.server.Server
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 
+private val LOCALMODE = true
+
 class MainActivity : AppCompatActivity() {
 
     private var logString = ""
-    private val serverAdd = "192.168.1.110"
-
-    //    private val webSocket = WebSocketClient(this)
-    private val kn = KryoNetClient(this)
     private val solver = Solver()
+
+
+    private val ep: ClientEndPoint =
+        if (LOCALMODE) LocalClientEndPoint() else KryoNetClientEndPoint()
 
     private var switchOffManually = false
 
@@ -27,10 +30,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        kn.start()
+        mainActivity = this
 
         logAppend("Welcome to Mobile Cloud!")
         logAppend("Tap Connect to start ... ")
+
+        if (LOCALMODE) {
+            Server.main(arrayOf(true.toString()))
+        }
 //        val ip =
 
         netSwitcher.setOnCheckedChangeListener { _, isChecked -> switchChecked(isChecked) }
@@ -45,18 +52,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun switchChecked(isChecked: Boolean) {
         if (isChecked) {
+//            if(!ep.connect()){
+//                retryNetSwitch()
+//            }
             Thread {
-                kn.connect(5000, serverAdd, 9544, 9566)
-                kn.sendTCP(Message("Hi, this is ${Build.MODEL}"))
+                if (ep.connect()) {
 
+                }
             }.start()
-
+            ep.send(Message("Hi, this is ${Build.MODEL}"))
 //            webSocket.connect("ws://192.168.10.143:9544")
 //            webSocket.sendTask(Task.Message("Hi, this is ${android.os.Build.MODEL}"))
-            switchOffManually = false
+//            switchOffManually = false
         } else {
 //            webSocket.close(4321, "bye")
-            switchOffManually = true
+//            switchOffManually = true
+            ep.disconnect()
         }
     }
 
@@ -79,21 +90,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun retryNetSwitch() {
-        if (switchOffManually)
-            return
+//        if (switchOffManually)
+//            return
 
         if (!netSwitcher.isChecked) {
             return
         }
         runOnUiThread {
             netSwitcher.performClick()
-//            netSwitcher.
         }
         Thread.sleep(5000)
         runOnUiThread {
             netSwitcher.performClick()
         }
-        switchOffManually = true
+//        switchOffManually = true
     }
 
 
@@ -104,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                 logAppend("Msg: ${task.msg}")
             }
             is Profile -> {
-                kn.sendTCP(profile)
+                ep.send(profile)
             }
             else -> {
 //                logAppend("received" + task.id)
@@ -120,9 +130,13 @@ class MainActivity : AppCompatActivity() {
                                 + dur + "ms"
                     )
                 }
-                kn.sendTCP(res)
+                ep.send(res)
             }
         }
+    }
+
+    companion object {
+        lateinit var mainActivity: MainActivity
     }
 
 }
