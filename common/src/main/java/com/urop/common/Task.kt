@@ -1,5 +1,7 @@
 package com.urop.common
 
+import java.math.BigInteger
+
 
 open class Task(@JvmField var id: String = (globalID++).toString()) {
 
@@ -39,4 +41,14 @@ class NQueenTask(
     lateinit var solution: Array<Chessboard>
 
     constructor(size: Int = 0, step: Int = 0) : this(IntArray(size), size, step)
+}
+
+class FactorizationTask(
+    @JvmField val num: BigInteger = BigInteger.ONE
+) : Task() {
+    //    init {
+//        println("fact task $id created")
+//    }
+    lateinit var f1: BigInteger
+    lateinit var f2: BigInteger
 }

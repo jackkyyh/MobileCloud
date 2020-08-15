@@ -25,7 +25,7 @@ public abstract class TaskController implements Runnable {
 
 
     @Override
-    public void run() {
+    final public void run() {
 
         dispatcher.blockUntilSomeNodeConnect(waitFor);
 
@@ -57,19 +57,20 @@ public abstract class TaskController implements Runnable {
 
     abstract boolean checkResult();
 
-    public void commitTask(Connection conn, Task t) {
-        dispatcher.commitTask(conn, t);
-    }
+    abstract public void commitTask(Connection conn, Task t);
+//    public void commitTask(Connection conn, Task t) {
+//        dispatcher.commitTask(conn, t);
+//    }
 
-    public void setWaitFor(int w) {
+    final public void setWaitFor(int w) {
         waitFor = w;
     }
 
-    public void setPrintProfile(boolean p) {
+    final public void setPrintProfile(boolean p) {
         printProfile = p;
     }
 
-    void safeWait() {
+    final void safeWait() {
         try {
             this.wait();
         } catch (InterruptedException e) {

@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-private val LOCALMODE = true
+private val LOCALMODE = false
 
 class MainActivity : AppCompatActivity() {
 
@@ -120,16 +120,16 @@ class MainActivity : AppCompatActivity() {
 //                logAppend("received" + task.id)
                 solver.addTask(task)
                 var res = Task()
-                val dur = profile.add("useful work") { res = solver.work() }
+                val dur = profile.add("useful") { res = solver.work() }
 
                 //            if(res.id[res.id.length-1] == '1'){
-                if (res.id.slice(0..2) == "[0,") {
+//                if (res.id.slice(0..2) == "[0,") {
                     val name = res.javaClass.simpleName
                     logAppend(
                         "$name ${res.id} done: "
                                 + dur + "ms"
                     )
-                }
+//                }
                 ep.send(res)
             }
         }

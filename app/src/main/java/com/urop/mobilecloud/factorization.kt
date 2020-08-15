@@ -1,33 +1,42 @@
-package com.urop.common
+package com.urop.mobilecloud
 
+import com.urop.common.FactorizationTask
+import com.urop.common.Profile.profile
 import java.math.BigInteger
 
-fun miniTest(num1: String): String {
-    var num = num1
-    val b = BigInteger(num)
-    //不用多解释了吧
-    //不用多解释了吧
-    if (b.compareTo(BigInteger.ZERO) < 0) return "不是非负数"
+val factorize: FactorizationTask.() -> Unit = {
+    var sq = BigInteger.ZERO
+
+    profile.add("sqrt") { sq = num.sqrt() }
+
+//    profile.add("search"){
+    var rem = BigInteger.ZERO
+    profile.add("mod") { rem = num.mod(sq) }
+    while (rem != BigInteger.ZERO) {
+        profile.add("sub") { sq = sq.subtract(BigInteger.ONE) }
+        profile.add("mod") { rem = num.mod(sq) }
+    }
+//    }
+    f1 = sq
+    f2 = num.divide(sq)
+}
+
+
+fun BigInteger.sqrt(): BigInteger {
+    var num = this.toString()
 
     var sqrt = "0" //开方结果
-
     var pre = "0" //开方过程中需要计算的被减数
-
     var trynum: BigInteger //试商，开放过程中需要计算的减数
-
     var flag: BigInteger //试商，得到满足要求减数的之后一个数
-
     val _20 = BigInteger("20") //就是20
-
     var dividend: BigInteger ///开方过程中需要计算的被减数
-
     var A: BigInteger? //(10*A+B)^2=M
 
     var B: BigInteger
     var BB: BigInteger
 
     var len: Int = num.length //数字的长度
-
 
     if (len % 2 == 1) //长度是奇数的画，首位补上1个0凑成偶数位
     {
@@ -55,6 +64,5 @@ fun miniTest(num1: String): String {
             }
         }
     }
-    return sqrt.substring(1)
-
+    return BigInteger(sqrt.substring(1))
 }

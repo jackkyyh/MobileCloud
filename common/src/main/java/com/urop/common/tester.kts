@@ -1,6 +1,6 @@
 
-import com.urop.common.SortTask
-import com.urop.common.Task
+import com.urop.common.miniTest
+import kotlin.system.measureTimeMillis
 
 //fun test(serial: (it: Int) -> (Unit), deserial: (it: Int) -> (Unit)) {
 //}
@@ -16,17 +16,6 @@ import com.urop.common.Task
 
 //miniTest()
 
-
-val lam: Task.() -> Unit = {
-    println("in lambda")
-    id = "iid"
-}
-
-fun getQSort(): SortTask {
-    return SortTask(1, 2)
-}
-
-//val t: Task = getQSort()
-val t = Task()
-val tt = t.apply(lam)
-println(tt.id)
+var sq = ""
+println(measureTimeMillis { sq = miniTest("27065524748708") })
+println(measureTimeMillis { miniTest("7065524748708") })

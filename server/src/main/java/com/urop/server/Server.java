@@ -7,7 +7,7 @@ import com.urop.common.Connection;
 import com.urop.common.Message;
 import com.urop.common.Profile;
 import com.urop.common.Task;
-import com.urop.server.taskController.SortController;
+import com.urop.server.taskController.FactorizationController;
 import com.urop.server.taskController.TaskController;
 
 import java.text.SimpleDateFormat;
@@ -37,7 +37,12 @@ public class Server {
         logAppend("This is the server!");
 
         server = new Server(args.length > 0 && Boolean.parseBoolean(args[0]));
-        TaskController ctrler = new SortController(1000000, 5000);
+        TaskController ctrler = new FactorizationController("90562281679333");
+        // 27065524748708
+        // 2620725173057
+        // 1495156599569
+        // 150812360887663
+        // 38299603481
         ctrler.setWaitFor(1);
         server.run(ctrler);
     }

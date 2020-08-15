@@ -57,7 +57,7 @@ public class QueenController extends TaskController {
 //                logAppend("new task created");
             }
         }
-        super.commitTask(conn, t);
+        dispatcher.commitTask(conn, t);
 
     }
 }

@@ -24,6 +24,7 @@ class Solver {
             is QSortTask -> task.apply(qsort)
             is MSortTask -> task.apply(msort)
             is NQueenTask -> task.apply(nqueens)
+            is FactorizationTask -> task.apply(factorize)
             is NOPTask -> task
             else -> Message("CMD not understood!")
         }

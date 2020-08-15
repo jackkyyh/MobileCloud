@@ -20,7 +20,6 @@ public class NopController extends TaskController {
 
     @Override
     public void commitTask(Connection conn, Task t) {
-
         dispatcher.commitTask(conn, t);
     }
 }
